@@ -47,17 +47,22 @@ import {
   TaskItem,
   TaskList,
   UniqueID,
+  CommentsKit,
+
 } from '.'
 
 import { ImageUpload } from './ImageUpload'
 import { TableOfContentsNode } from './TableOfContentsNode'
 import { isChangeOrigin } from '@tiptap/extension-collaboration'
+import CollaborationHistory from '@tiptap-pro/extension-collaboration-history'
+
 
 interface ExtensionKitProps {
-  provider?: HocuspocusProvider | null
+  provider?: HocuspocusProvider | null,
+  historyObject: object
 }
 
-export const ExtensionKit = ({ provider }: ExtensionKitProps) => [
+export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => [
   Document,
   Columns,
   TaskList,
@@ -161,6 +166,33 @@ export const ExtensionKit = ({ provider }: ExtensionKitProps) => [
     width: 2,
     class: 'ProseMirror-dropcursor border-black',
   }),
+  CommentsKit.configure({
+    provider: provider,
+
+  }),
+  CollaborationHistory.configure({
+    provider: provider,
+    onUpdate: data => {
+      if ("setVersions" in historyObject) {
+          // @ts-ignore
+          historyObject.setVersions(data.versions)
+      }
+      if ("setIsAutoVersioning" in historyObject) {
+          // @ts-ignore
+          historyObject.setIsAutoVersioning(data.versioningEnabled)
+      }
+
+      if ("setLatestVersion" in historyObject) {
+        // @ts-ignore
+        historyObject.setLatestVersion(data.version)
+      }
+      if ("setCurrentVersion" in historyObject) {
+        // @ts-ignore
+        historyObject.setCurrentVersion(data.currentVersion)
+      }
+    },
+  }),
+
 ]
 
 export default ExtensionKit

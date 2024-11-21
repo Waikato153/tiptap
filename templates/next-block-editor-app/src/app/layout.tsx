@@ -1,4 +1,5 @@
 import './globals.css'
+import './style.scss'
 import type { Metadata } from 'next'
 
 import 'cal-sans'

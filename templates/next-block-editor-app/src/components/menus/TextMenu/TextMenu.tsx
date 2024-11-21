@@ -23,10 +23,12 @@ const MemoFontSizePicker = memo(FontSizePicker)
 const MemoContentTypePicker = memo(ContentTypePicker)
 
 export type TextMenuProps = {
-  editor: Editor
+  editor: Editor,
+  createThread: (currentVersion: number) => void;
+  currentVersion: number
 }
 
-export const TextMenu = ({ editor }: TextMenuProps) => {
+export const TextMenu = ({ editor, createThread, currentVersion }: TextMenuProps) => {
   const commands = useTextmenuCommands(editor)
   const states = useTextmenuStates(editor)
   const blockOptions = useTextmenuContentTypes(editor)
@@ -142,6 +144,9 @@ export const TextMenu = ({ editor }: TextMenuProps) => {
             </Surface>
           </Popover.Content>
         </Popover.Root>
+        <MemoButton tooltip="Comment" onClick={() => createThread(currentVersion)}>
+          <Icon name="Chrome" />
+        </MemoButton>
         <Popover.Root>
           <Popover.Trigger asChild>
             <MemoButton tooltip="More options">

@@ -13,6 +13,7 @@ import type { EditorUser } from '../components/BlockEditor/types'
 import { initialContent } from '@/lib/data/initialContent'
 import { Ai } from '@/extensions/Ai'
 import { AiImage, AiWriter } from '@/extensions'
+import { ThreadsKit } from '@tiptap-pro/extension-comments'
 
 declare global {
   interface Window {
@@ -24,12 +25,14 @@ export const useBlockEditor = ({
   aiToken,
   ydoc,
   provider,
+  historyObject,
   userId,
   userName = 'Maxi',
 }: {
   aiToken?: string
   ydoc: YDoc
   provider?: TiptapCollabProvider | null | undefined
+  historyObject: object
   userId?: string
   userName?: string
 }) => {
@@ -43,6 +46,7 @@ export const useBlockEditor = ({
       shouldRerenderOnTransaction: false,
       autofocus: true,
       onCreate: ctx => {
+        console.log(initialContent)
         if (provider && !provider.isSynced) {
           provider.on('synced', () => {
             setTimeout(() => {
@@ -56,10 +60,17 @@ export const useBlockEditor = ({
           ctx.editor.commands.focus('start', { scrollIntoView: true })
         }
       },
+      onUpdate: ({ editor }) => {
+        const content = editor.getJSON(); // 获取更新后的文档内容
+        console.log("Content has changed:", content);
+        const content2 = editor.getHTML();
+        console.log("Content has changed:", content2);
+      },
       extensions: [
         ...ExtensionKit({
-          provider,
+          provider, historyObject
         }),
+
         provider
           ? Collaboration.configure({
               document: ydoc,
@@ -94,8 +105,10 @@ export const useBlockEditor = ({
           autocorrect: 'off',
           autocapitalize: 'off',
           class: 'min-h-full',
+
         },
       },
+
     },
     [ydoc, provider],
   )

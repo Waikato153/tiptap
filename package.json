@@ -9,10 +9,17 @@
   "scripts": {
     "dev": "npm run dev --prefix ./templates/next-block-editor-app",
     "dev:simple-editor": "npm run dev --prefix ./templates/react-simple-editor",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build --prefix ./templates/next-block-editor-app",
+    "lint": "npm run lint --prefix ./templates/next-block-editor-app"
   },
   "keywords": [],
   "author": "Nick the Sick",
   "license": "SEE LICENSE IN LICENSE.md",
-  "dependencies": {}
+  "dependencies": {
+    "@hocuspocus/transformer": "^2.13.7",
+    "@radix-ui/react-dialog": "^1.1.2",
+    "@tiptap-pro/extension-collaboration-history": "^2.14.0",
+    "@tiptap-pro/extension-comments": "^2.13.0"
+  }
 }

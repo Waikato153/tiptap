@@ -31,7 +31,7 @@ The template is structured as a Next.js app with a few additional folders and fi
   - **BlockEditor** the wrapping BlockEditor setup component
   - **menus** a set of menus used in the editor (for example Link, Text and DragHandle menus)
   - **panels** popover menus used in menu bars for example the Colorpicker or Link editor
-  - **Sidebar** the sidebar component
+  - **CommentSidebar** the sidebar component
   - **TableOfContents** the table of contents component used for navigation
   - **ui** general reusable UI components used across the application
 - **context** A place to put React contexts that are used in the app

@@ -9,6 +9,8 @@ export type IconProps = {
 }
 
 export const Icon = memo(({ name, className, strokeWidth }: IconProps) => {
+
+
   const IconComponent = icons[name]
 
   if (!IconComponent) {

@@ -67,6 +67,7 @@ export default function Document({ params }: { params: { room: string } }) {
         }
         const data = await response.json()
 
+
         const { token } = data
 
         // set state when the data received
