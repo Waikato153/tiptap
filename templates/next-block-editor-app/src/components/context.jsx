@@ -8,8 +8,8 @@ export const ThreadsContext = createContext({
   selectedThreads: [],
   selectedThread: null,
 
-  onClickThread: () => null,
-  deleteThread: () => null,
+  onClickThread: () => {},
+  deleteThread: () => {},
   resolveThread: () => null,
   unresolveThread: () => null,
   onCloseThread: () => null,
@@ -24,13 +24,13 @@ export const ThreadsProvider = ({
                                   children,
                                   threads = [],
                                   selectedThreads = [],
-                                  onClickThread = () => null,
-                                  onDeleteThread = () => null,
-                                  onResolveThread = () => null,
-                                  onUnresolveThread = () => null,
-                                  onUpdateComment = () => null,
-                                  onHoverThread = () => null,
-                                  onLeaveThread = () => null,
+                                  onClickThread = (threadid) => {},
+                                  onDeleteThread = (threadid) => {},
+                                  onResolveThread = (threadid) => null,
+                                  onUnresolveThread = (threadid) => null,
+                                  onUpdateComment = (threadid, commentId, content, metaData) => null,
+                                  onHoverThread = (threadid) => null,
+                                  onLeaveThread = (threadid) => null,
                                 }) => {
   const [selectedThread, setSelectedThread] = useState(null)
 

@@ -1,4 +1,4 @@
-import type { Language } from '@/extensions/Ai'
+//import type { Language } from '@/extensions/Ai'
 
 export type EditorUser = {
   clientId: string
@@ -10,7 +10,7 @@ export type EditorUser = {
 export type LanguageOption = {
   name: string
   label: string
-  value: Language
+  value: any
 }
 
 export type AiTone =

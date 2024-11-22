@@ -8,7 +8,11 @@ import {
 
 import { VersionItem } from './VersionItem'
 import { ExtensionKit } from '@/extensions/extension-kit'
-const getVersionName = version => {
+
+// Define the type for version
+interface Version {version: number;name?: string;date: string;}
+
+const getVersionName = (version: Version) => {
   if (version.name) {
     return version.name
   }
@@ -20,7 +24,15 @@ const getVersionName = version => {
   return `Version ${version.version}`
 }
 
-export const VersioningModal = memo(
+interface VersioningModalProps {
+  versions: Version[];  // Declare 'versions' as an array of Version objects
+  isOpen: boolean;
+  onClose: () => void;
+  onRevert: (versionId: number, versionData: Version | null) => void;
+  provider: any; // Adjust 'any' to the correct type for your provider
+}
+
+export const VersioningModal = memo<VersioningModalProps>(
   ({
      versions,
      isOpen,
@@ -28,17 +40,18 @@ export const VersioningModal = memo(
      onRevert,
      provider,
    }) => {
-    const [currentVersionId, setCurrentVersionId] = useState(null)
-    const isCurrentVersion = versions && versions.length > 0 ? currentVersionId === versions.at(-1).version : false
+    const [currentVersionId, setCurrentVersionId] = useState<number | null>(null)
+    const isCurrentVersion = versions && versions.length > 0 ? currentVersionId === versions.at(-1)?.version : false
 
-    const historyObject = {};
+    const historyObject = {}
 
     const editor = useEditor({
       editable: false,
       content: '',
       extensions: [
         ...ExtensionKit({
-          provider, historyObject
+          provider,
+          historyObject
         }),
 
         StarterKit
@@ -47,8 +60,7 @@ export const VersioningModal = memo(
 
     const reversedVersions = useMemo(() => versions.slice().reverse(), [versions])
 
-    const handleVersionChange = useCallback(newVersion => {
-
+    const handleVersionChange = useCallback((newVersion: number) => {
       setCurrentVersionId(newVersion)
 
       provider.sendStateless(JSON.stringify({
@@ -63,11 +75,12 @@ export const VersioningModal = memo(
       }
 
       return versions.find(v => v.version === currentVersionId)
-    }, [currentVersionId, editor, provider])
+    }, [currentVersionId, versions])
 
     useEffect(() => {
       if (isOpen && currentVersionId === null && versions.length > 0) {
-        const initialVersion = versions.at(-1).version
+        const initialVersion = versions.at(-1)?.version ?? null;
+
 
         setCurrentVersionId(initialVersion)
 
@@ -80,8 +93,7 @@ export const VersioningModal = memo(
 
     useEffect(() => {
       if (isOpen) {
-        const unbindContentWatcher = watchPreviewContent(provider, content => {
-
+        const unbindContentWatcher = watchPreviewContent(provider, (content) => {
           if (editor) {
             editor.commands.setContent(content)
           }
@@ -94,21 +106,30 @@ export const VersioningModal = memo(
     }, [isOpen, provider, editor])
 
     const onOpenChange = useCallback(
-      open => {
+      (open: boolean) => {
         if (!open) {
           onClose()
           setCurrentVersionId(null)
-          editor.commands.clearContent()
+          if (editor) {
+            editor.commands.clearContent();
+          }
+
         }
       },
       [onClose, editor],
     )
 
     const handleRevert = useCallback(() => {
+
+      if (currentVersionId === null) {
+        // Handle the case where currentVersionId is null, maybe show an error or return early
+        return;
+      }
+
       const accepted = confirm('Are you sure you want to revert to this version? Any changes not versioned will be lost.') // eslint-disable-line no-restricted-globals
 
       if (accepted) {
-        onRevert(currentVersionId, versionData)
+        onRevert(currentVersionId, versionData ?? null)
         onClose()
       }
     }, [onRevert, currentVersionId, onClose])
@@ -127,7 +148,7 @@ export const VersioningModal = memo(
                 <div className="sidebar-options">
                   <div className="label-large">History ({reversedVersions.length} versions)</div>
                   <div className="versions-group">
-                    {reversedVersions.map(v => (
+                    {reversedVersions.map((v) => (
                       <VersionItem
                         date={v.date}
                         title={getVersionName(v)}

@@ -1,46 +1,45 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react';
 
-// @ts-ignore
-export const ThreadCard = ({
-                             id,
-                             active,
-                             open,
-                             children,
-                             onClick,
-                             onClickOutside,
-                           }) => {
-  const cardRef = useRef()
+interface ThreadCardProps {
+  id: string; // Explicitly type the id as a string
+  active: boolean;
+  open: boolean;
+  children: React.ReactNode;
+  onClick: (id: string) => void;
+  onClickOutside?: () => void;
+}
+
+export const ThreadCard: React.FC<ThreadCardProps> = ({
+                                                        id,
+                                                        active,
+                                                        open,
+                                                        children,
+                                                        onClick,
+                                                        onClickOutside,
+                                                      }) => {
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
   const handleClick = useCallback(() => {
     if (onClick) {
-      onClick(id)
+      onClick(id); // 'id' is now typed as 'string'
     }
-  }, [id, onClick])
+  }, [id, onClick]);
 
   useEffect(() => {
-    if (!active) {
-      return () => null
-    }
+    if (!active || !onClickOutside) return;
 
-    const clickHandler = onClickOutside ? event => {
-      if (!cardRef.current) {
-        return
+    const clickHandler = (event: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        onClickOutside();
       }
+    };
 
-      if (!cardRef.current.contains(event.target)) {
-        onClickOutside()
-      }
-    } : null
-
-    if (clickHandler) {
-      document.addEventListener('click', clickHandler)
-    }
+    document.addEventListener('click', clickHandler);
 
     return () => {
-      if (clickHandler) {
-        document.removeEventListener('click', clickHandler)
-      }
-    }
-  }, [active, onClickOutside])
+      document.removeEventListener('click', clickHandler);
+    };
+  }, [active, onClickOutside]);
 
   return (
     <div
@@ -50,5 +49,5 @@ export const ThreadCard = ({
     >
       {children}
     </div>
-  )
-}
+  );
+};

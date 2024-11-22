@@ -1,6 +1,6 @@
 'use client'
 
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import {HocuspocusProvider, TiptapCollabProvider} from '@hocuspocus/provider'
 
 import { API } from '@/lib/api'
 
@@ -58,7 +58,7 @@ import CollaborationHistory from '@tiptap-pro/extension-collaboration-history'
 
 
 interface ExtensionKitProps {
-  provider?: HocuspocusProvider | null,
+  provider?: TiptapCollabProvider | null,
   historyObject: object
 }
 
@@ -171,7 +171,7 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
 
   }),
   CollaborationHistory.configure({
-    provider: provider,
+    provider: provider!,
     onUpdate: data => {
       if ("setVersions" in historyObject) {
           // @ts-ignore

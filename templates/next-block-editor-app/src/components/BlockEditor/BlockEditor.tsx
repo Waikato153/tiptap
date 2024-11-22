@@ -112,20 +112,23 @@ export const BlockEditor = ({
 
   }, [editor])
 
-  const deleteThread = useCallback((threadId: string) => {
+  const deleteThread = useCallback((threadId: any) => {
     // @ts-ignore
     provider.deleteThread(threadId)
     editor.commands.removeThread({ id: threadId })
+    return null
   }, [editor])
 
   // @ts-ignore
   const resolveThread = useCallback(threadId => {
     editor.commands.resolveThread({ id: threadId })
+    return null
   }, [editor])
 
   // @ts-ignore
   const unresolveThread = useCallback(threadId => {
     editor.commands.unresolveThread({ id: threadId })
+    return null
   }, [editor])
 
   // @ts-ignore
@@ -133,6 +136,7 @@ export const BlockEditor = ({
     editor.commands.updateComment({
       threadId, id: commentId, content, data: metaData,
     })
+    return null
   }, [editor])
 
   // @ts-ignore
@@ -141,6 +145,7 @@ export const BlockEditor = ({
 
     tr.setMeta('threadMouseOver', threadId)
     editor.view.dispatch(tr)
+    return null
   }, [editor])
 
   // @ts-ignore
@@ -149,10 +154,11 @@ export const BlockEditor = ({
 
     tr.setMeta('threadMouseOut', threadId)
     editor.view.dispatch(tr)
+    return null
   }, [editor])
 
 
-  const handleNewVersion = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewVersion = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     if (!commitDescription) {
       return
@@ -181,10 +187,14 @@ export const BlockEditor = ({
   }
 
 
+  // @ts-ignore
   const filteredThreads = threads.filter(t => (showUnresolved ? !t.resolvedAt : !!t.resolvedAt))
 
 
 
+  // @ts-ignore
+  // @ts-ignore
+  // @ts-ignore
   // @ts-ignore
   // @ts-ignore
   // @ts-ignore
@@ -220,8 +230,6 @@ export const BlockEditor = ({
               isOpen={versioningModalOpen}
               onClose={handleVersioningClose}
               onRevert={handleRevert}
-              currentVersion={currentVersion}
-              latestVersion={latestVersion}
               provider={provider}
             />
             <div className="col-group">
