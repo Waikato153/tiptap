@@ -48,6 +48,7 @@ import {
   TaskList,
   UniqueID,
   CommentsKit,
+  ShowModal,
 
 } from '.'
 
@@ -55,13 +56,21 @@ import { ImageUpload } from './ImageUpload'
 import { TableOfContentsNode } from './TableOfContentsNode'
 import { isChangeOrigin } from '@tiptap/extension-collaboration'
 import CollaborationHistory from '@tiptap-pro/extension-collaboration-history'
+import { Import } from '@tiptap-pro/extension-import'
 
+import { SearchAndReplace } from "@sereneinserenade/tiptap-search-and-replace";
 
 interface ExtensionKitProps {
   provider?: TiptapCollabProvider | null,
   historyObject: object
 }
 
+
+// @ts-ignore
+// @ts-ignore
+// @ts-ignore
+// @ts-ignore
+// @ts-ignore
 export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => [
   Document,
   Columns,
@@ -75,6 +84,7 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
     levels: [1, 2, 3, 4, 5, 6],
   }),
   HorizontalRule,
+  ShowModal,
   UniqueID.configure({
     types: ['paragraph', 'heading', 'blockquote', 'codeBlock', 'table'],
     filterTransaction: transaction => !isChangeOrigin(transaction),
@@ -114,6 +124,7 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
     clientId: provider?.document?.clientID,
   }),
   ImageBlock,
+
   FileHandler.configure({
     allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
     onDrop: (currentEditor, files, pos) => {
@@ -170,6 +181,17 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
     provider: provider,
 
   }),
+
+  CommentsKit.configure({
+    provider,
+    useLegacyWrapping: false,
+    onClickThread: threadId => {
+      // @ts-ignore
+      historyObject.threadClickHandler(threadId);
+    },
+  }),
+
+
   CollaborationHistory.configure({
     provider: provider!,
     onUpdate: data => {
@@ -192,6 +214,28 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
       }
     },
   }),
+
+  Import.configure({
+    // The Convert App-ID from the Convert settings page: https://cloud.tiptap.dev/convert-settings
+    appId: 'xm41ppym',
+
+    // The JWT token you generated in the previous step
+    //token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzM2ODg0NTgsIm5iZiI6MTczMzY4ODQ1OCwiZXhwIjoxNzMzNzc0ODU4LCJpc3MiOiJodHRwczovL2Nsb3VkLnRpcHRhcC5kZXYiLCJhdWQiOiJiYWU0NjkxZS0zYjQ0LTQzOGMtYjZjZi1jYTZlMGNiNDU5ODUifQ.AVYqzAwEjCh1YL-2U4nQ1bCdIKyWHjeJC9CMehPVbJs',
+    // @ts-ignore
+    token: historyObject.convertToken
+    //token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzM3MDI3MTR9.vZWycjkRUnAcSoBrndVHmLGjV9nClivAslqCw9noPdY'
+  }),
+
+  SearchAndReplace.configure({
+    searchResultClass: "search-result", // class to give to found items. default 'search-result'
+    // @ts-ignore
+    caseSensitive: false, // no need to explain
+    disableRegex: false, // also no need to explain
+
+  }),
+
+
+
 
 ]
 

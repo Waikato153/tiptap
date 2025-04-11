@@ -84,7 +84,9 @@
     "tippy.js": "^6.3.7",
     "uuid": "^9.0.1",
     "y-prosemirror": "^1.2.11",
-    "yjs": "^13.6.18"
+    "yjs": "^13.6.18",
+    "@tiptap-pro/extension-export": "^2.16.3",
+    "@tiptap-pro/extension-import": "^2.16.3"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.14",

@@ -1,12 +1,32 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import API from '@/lib/api'
+
 export const useThreads = (provider, editor, user) => {
   const [threads, setThreads] = useState()
 
   useEffect(() => {
     if (provider) {
       const updateHandler = () => {
-        setThreads(provider.getThreads())
+
+        let threadsList = provider.getThreads()
+
+
+        if (threadsList.length == 0 && user?.file?.comment) {
+          //threadsList = JSON.parse(user.file.comment)
+        }
+
+        let data = {
+          'data': threadsList,
+          action: 'comment',
+          file_id: user.room,
+          rtime: new Date().getTime()
+        }
+
+        API.saveExtraToEditor(user.room, data)
+
+        setThreads(threadsList)
+
       }
 
       provider.watchThreads(updateHandler)
@@ -30,11 +50,11 @@ export const useThreads = (provider, editor, user) => {
       return
     }
 
-
-
     editor.chain().focus().setThread({
-      version: currentVersion,
-      content: input, commentData: { userName: user.name } }).run()
+
+      content: input, commentData: { userName: user.name,
+        version: currentVersion,
+      } }).run()
   }, [editor, user])
 
   const removeThread = useCallback(() => {

@@ -179,6 +179,17 @@ export const GROUPS: Group[] = [
           editor.chain().focus().insertTableOfContents().run()
         },
       },
+      {
+        name: 'toc1',
+        label: 'Insert Tag Placeholder',
+        iconName: 'Book',
+        aliases: ['outline'],
+        description: 'Insert a table of contents',
+        //shouldBeHidden: editor => editor.isActive('columns'),
+        action: editor => {
+          editor.chain().focus().showModal().run();
+        },
+      },
     ],
   },
 ]

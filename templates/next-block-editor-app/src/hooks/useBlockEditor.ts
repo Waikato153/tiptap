@@ -14,12 +14,19 @@ import { initialContent } from '@/lib/data/initialContent'
 // import { Ai } from '@/extensions/Ai'
 // import { AiImage, AiWriter } from '@/extensions'
 //import { ThreadsKit } from '@tiptap-pro/extension-comments'
+import API from '@/lib/api';
+import { debounce } from 'lodash';
+
+const debouncedSave = debounce((content2, contentJSON, room: string) => {
+  API.saveTip(content2, contentJSON, room);
+}, 4000); // 延迟 500ms
 
 declare global {
   interface Window {
     editor: Editor | null
   }
 }
+
 
 export const useBlockEditor = ({
   aiToken,
@@ -46,7 +53,7 @@ export const useBlockEditor = ({
       shouldRerenderOnTransaction: false,
       autofocus: true,
       onCreate: ctx => {
-        console.log(initialContent)
+
         if (provider && !provider.isSynced) {
           provider.on('synced', () => {
             setTimeout(() => {
@@ -62,9 +69,10 @@ export const useBlockEditor = ({
       },
       onUpdate: ({ editor }) => {
         const content = editor.getJSON(); // 获取更新后的文档内容
-        console.log("Content has changed:", content);
+
         const content2 = editor.getHTML();
-        console.log("Content has changed:", content2);
+        // @ts-ignore
+        debouncedSave(content2, JSON.stringify(content), historyObject.room);
       },
       extensions: [
         ...ExtensionKit({
@@ -80,8 +88,10 @@ export const useBlockEditor = ({
           ? CollaborationCursor.configure({
               provider,
               user: {
-                name: randomElement(userNames),
+                //name: randomElement(userNames),
                 color: randomElement(userColors),
+                name:userName,
+
               },
             })
           : undefined,

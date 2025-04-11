@@ -11,10 +11,9 @@ import '@fontsource/inter/400.css'
 import '@fontsource/inter/500.css'
 import '@fontsource/inter/600.css'
 import '@fontsource/inter/700.css'
-
 export const metadata: Metadata = {
   metadataBase: new URL('https://demos.tiptap.dev'),
-  title: 'Tiptap block editor template',
+  title: 'Fluid Business Management System',
   description:
     'Tiptap is a suite of open source content editing and real-time collaboration tools for developers building apps like Notion or Google Docs.',
   robots: 'noindex, nofollow',

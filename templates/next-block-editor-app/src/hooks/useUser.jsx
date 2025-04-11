@@ -32,12 +32,16 @@ const getRandomElement = list => list[Math.floor(Math.random() * list.length)]
 const getRandomColor = () => getRandomElement(colors)
 const getRandomName = () => getRandomElement(names)
 
-export const userName = getRandomName()
 export const userColor = getRandomColor()
 
-export const useUser = () => {
+export const useUser = (room, fileInfo) => {
+
+  const userName = fileInfo?.user?.name_first + ' ' + fileInfo?.user?.name_last;
+
   return {
     name: userName,
     color: userColor,
+    room: room,
+    file: fileInfo
   }
 }

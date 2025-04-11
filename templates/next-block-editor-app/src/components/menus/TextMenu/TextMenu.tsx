@@ -23,12 +23,12 @@ const MemoFontSizePicker = memo(FontSizePicker)
 const MemoContentTypePicker = memo(ContentTypePicker)
 
 export type TextMenuProps = {
-  editor: Editor,
+  editor: Editor;
   createThread: (currentVersion: number) => void;
   currentVersion: any
 }
 
-export const TextMenu = ({ editor, createThread, currentVersion }: TextMenuProps) => {
+export const TextMenu = ({ editor, createThread,  currentVersion }: TextMenuProps) => {
   const commands = useTextmenuCommands(editor)
   const states = useTextmenuStates(editor)
   const blockOptions = useTextmenuContentTypes(editor)

@@ -1,6 +1,5 @@
 import {
   createContext, useCallback, useContext,
-  useState,
 } from 'react'
 
 export const ThreadsContext = createContext({
@@ -8,33 +7,33 @@ export const ThreadsContext = createContext({
   selectedThreads: [],
   selectedThread: null,
 
-  onClickThread: () => {},
-  deleteThread: () => {},
+  onClickThread: () => null,
+  deleteThread: () => null,
   resolveThread: () => null,
   unresolveThread: () => null,
-  onCloseThread: () => null,
-  selectThread: () => null,
-  unselectThread: () => null,
   onUpdateComment: () => null,
   onHoverThread: () => null,
   onLeaveThread: () => null,
 })
 
+// @ts-ignore
 export const ThreadsProvider = ({
                                   children,
                                   threads = [],
                                   selectedThreads = [],
-                                  onClickThread = (threadid) => {},
-                                  onDeleteThread = (threadid) => {},
-                                  onResolveThread = (threadid) => null,
-                                  onUnresolveThread = (threadid) => null,
-                                  onUpdateComment = (threadid, commentId, content, metaData) => null,
-                                  onHoverThread = (threadid) => null,
-                                  onLeaveThread = (threadid) => null,
+                                  selectedThread = null,
+                                  onClickThread = (id) => {},
+                                  onDeleteThread = (id) => {},
+                                  onResolveThread = (id) => {},
+                                  onUnresolveThread = (id) => {},
+                                  onUpdateComment = (threadId, commentId, content, metaData) => {},
+                                  onHoverThread = (id) => {},
+                                  onLeaveThread = (id) => {},
+                                  setSelectedThread = (id) => {}
                                 }) => {
-  const [selectedThread, setSelectedThread] = useState(null)
-
+  // @ts-ignore
   const handleThreadClick = useCallback(threadId => {
+    // @ts-ignore
     setSelectedThread(currentThreadId => {
       if (currentThreadId !== threadId) {
         onClickThread(threadId)
@@ -45,27 +44,20 @@ export const ThreadsProvider = ({
     })
   }, [onClickThread])
 
-  const onCloseThread = useCallback(() => {
-    setSelectedThread(null)
-  }, [])
-
   const providerValue = {
     threads,
     selectedThreads,
     selectedThread,
-
     deleteThread: onDeleteThread,
     resolveThread: onResolveThread,
     unresolveThread: onUnresolveThread,
     onClickThread: handleThreadClick,
-    onCloseThread,
     onUpdateComment,
-    selectThread: () => null,
-    unselectThread: () => null,
     onHoverThread,
     onLeaveThread,
   }
 
+  // @ts-ignore
   return (
     <ThreadsContext.Provider value={providerValue}>
       {children}

@@ -1,5 +1,7 @@
 const path = require('path')
 
+const packageJson = require('./package.json');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -12,6 +14,8 @@ const nextConfig = {
     if (!isServer) {
       // Ensure that all imports of 'yjs' resolve to the same instance
       config.resolve.alias['yjs'] = path.resolve(__dirname, '../../node_modules/yjs')
+
+
     }
     config.module.rules.push({
       test: /\.svg$/,

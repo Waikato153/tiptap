@@ -363,13 +363,12 @@ button[disabled], input[disabled], select[disabled], textarea[disabled] {
 
 .sidebar {
   border-left: 1px solid var(--gray-3);
-
   flex-shrink: 0;
   padding: 1rem;
   position: sticky;
   height: 100vh;
   top: 0;
-  width: 20rem
+
 }
 
 @media (max-width: 540px) {
@@ -808,7 +807,7 @@ input[type=text], textarea {
   border-left: 1px solid var(--gray-3);
   flex-shrink: 0;
   padding: 1rem;
-  width: 15rem;
+
   position: sticky;
   height: 100vh;
   top: 0
@@ -816,7 +815,7 @@ input[type=text], textarea {
 
 @media (min-width: 800px) {
   .sidebar {
-    width:20rem
+    //width:40rem
   }
 }
 
@@ -968,3 +967,66 @@ body:has(.dialog[data-state=open]) {
 .dialog-content .main {
   overflow: auto
 }
+
+
+.hint {
+  align-items: center;
+  background-color: var(--yellow-light);
+  border-radius: .5rem;
+  border: 1px solid var(--gray-2);
+  display: flex;
+  flex-direction: row;
+  font-size: .75rem;
+  gap: .25rem;
+  line-height: 1.15;
+  padding: .3rem .5rem
+}
+
+.hint.purple-spinner,.hint.error {
+  justify-content: center;
+  text-align: center;
+  width: 100%
+}
+
+.hint .badge {
+  background-color: var(--gray-1);
+  border: 1px solid var(--gray-3);
+  border-radius: 2rem;
+  color: var(--gray-5);
+  font-size: .625rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: .25rem .5rem
+}
+
+.hint.purple-spinner {
+  background-color: var(--purple-light)
+}
+
+.hint.purple-spinner:after {
+  content: "";
+  background-image: url("data:image/svg+xml;utf8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='28px' height='30px' viewBox='0 0 24 30' style='enable-background:new 0 0 50 50;' xml:space='preserve'><rect x='0' y='10' width='6' height='10' fill='%236A00F5' rx='3' ry='3'><animateTransform attributeType='xml' attributeName='transform' type='translate' values='0 0; 0 5; 0 -5; 0 0' begin='0' dur='0.6s' repeatCount='indefinite'/></rect><rect x='10' y='10' width='6' height='10' fill='%236A00F5' rx='3' ry='3'><animateTransform attributeType='xml' attributeName='transform' type='translate' values='0 0; 0 5; 0 -5; 0 0' begin='0.2s' dur='0.6s' repeatCount='indefinite'/></rect><rect x='20' y='10' width='6' height='10' fill='%236A00F5' rx='3' ry='3'><animateTransform attributeType='xml' attributeName='transform' type='translate' values='0 0; 0 5; 0 -5; 0 0' begin='0.4s' dur='0.6s' repeatCount='indefinite'/></rect></svg>");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 1rem;
+  width: 1rem
+}
+
+.hint.error {
+  background-color: var(--red-light)
+}
+.ProseMirror .search-result {
+  background-color: #ffd90080;
+}
+.ProseMirror .search-result-current {
+  background-color: #0dff0080;
+}
+
+:is(.dark .ProseMirror) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
