@@ -1,6 +1,7 @@
 import './globals.css'
 import './style.scss'
 import type { Metadata } from 'next'
+import { Providers } from './providers'
 
 import 'cal-sans'
 
@@ -34,7 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html className="h-full font-sans" lang="en">
       <body className="flex flex-col h-full">
-        <main className="h-full">{children}</main>
+        <Providers>
+          <main className="h-full">{children}</main>
+        </Providers>
       </body>
     </html>
   )
