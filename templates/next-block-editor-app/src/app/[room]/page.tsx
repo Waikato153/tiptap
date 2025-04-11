@@ -11,6 +11,10 @@ import { Surface } from '@/components/ui/Surface'
 import { Toolbar } from '@/components/ui/Toolbar'
 import { Icon } from '@/components/ui/Icon'
 import API from '@/lib/api';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/lib/store';
+import { setFileInfo, setFileInfoLoading, setFileInfoError } from '@/lib/slices/fileInfoSlice';
+
 
 
 const useDarkmode = () => {
@@ -49,13 +53,18 @@ export default function Document({ params }: { params: { room: string } }) {
   const [aiToken, setAiToken] = useState<string | null | undefined>()
   const searchParams = useSearchParams()
 
-  const [fileInfo, setFileinfo] = useState<any | null | undefined>()
-  const [fileInfoError, setFileInfoError] = useState<string | null>(null)
+
+  // 获取状态
+  const { data: fileInfo, loading: fileInfoLoading, error: fileInfoError } = useSelector((state: RootState) => state.fileInfo);
+
+  // 更新状态
+  const dispatch = useDispatch();
 
 
   const hasCollab = parseInt(searchParams?.get('noCollab') as string) !== 1 && collabToken !== null
 
   const { room } = params
+
 
   useEffect(() => {
     // fetch data
@@ -93,17 +102,33 @@ export default function Document({ params }: { params: { room: string } }) {
   useEffect(() => {
     const fetchFileInfo = async () => {
       try {
-        const data = await API.getFileInfo(room); // 等待异步函数的结果
-        setFileinfo(data); // 设置具体的值
-      } catch (error) {
-        console.error('Error fetching file info:', error);
-        setFileinfo(null); // 在出错时设置为 null 或其他默认值
-        setFileInfoError('Error fetching file info. Please try again later.');
-      }
-    };
-    fetchFileInfo(); // 调用异步函数
-  }, [room]); // 当 room 改变时重新调用
+        dispatch(setFileInfoLoading(true))
+        dispatch(setFileInfoError(null))
 
+        const response = await API.getFileInfo(room)
+
+        if (typeof response.id != 'undefined') {
+          dispatch(setFileInfo(response))
+        } else {
+          dispatch(setFileInfoError(response.error || 'Failed to fetch file info'))
+          dispatch(setFileInfo(null))
+        }
+      } catch (error: any) {
+        let errorMessage = "An unexpected error occurred."
+        if (error.response?.data?.error) {
+          errorMessage = error.response.data.error
+        } else if (error.message) {
+          errorMessage = error.message
+        }
+        dispatch(setFileInfoError(errorMessage))
+        dispatch(setFileInfo(null))
+      } finally {
+        dispatch(setFileInfoLoading(false))
+      }
+    }
+
+    fetchFileInfo()
+  }, [room, dispatch])
 
   useEffect(() => {
     // fetch data
