@@ -50,6 +50,7 @@ export default function Document({ params }: { params: { room: string } }) {
   const searchParams = useSearchParams()
 
   const [fileInfo, setFileinfo] = useState<any | null | undefined>()
+  const [fileInfoError, setFileInfoError] = useState<string | null>(null)
 
 
   const hasCollab = parseInt(searchParams?.get('noCollab') as string) !== 1 && collabToken !== null
@@ -97,6 +98,7 @@ export default function Document({ params }: { params: { room: string } }) {
       } catch (error) {
         console.error('Error fetching file info:', error);
         setFileinfo(null); // 在出错时设置为 null 或其他默认值
+        setFileInfoError('Error fetching file info. Please try again later.');
       }
     };
     fetchFileInfo(); // 调用异步函数
@@ -182,7 +184,26 @@ export default function Document({ params }: { params: { room: string } }) {
     }
   }, [setProvider, collabToken, ydoc, room, hasCollab])
 
-  if ((hasCollab && !provider) || convertToken === undefined || aiToken === undefined || collabToken === undefined || !fileInfo) return
+  if ((hasCollab && !provider) || convertToken === undefined || aiToken === undefined || collabToken === undefined || !fileInfo) {
+    return (
+      <>
+        <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-black bg-opacity-95 dark:bg-opacity-95 z-1000">
+          <div className="flex flex-col items-center gap-4">
+            {fileInfoError ? (
+              <div className="text-red-500 dark:text-red-400 text-lg font-medium text-center max-w-md">
+                {fileInfoError}
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-blue-500/20 dark:border-blue-400/20 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   const DarkModeSwitcher = createPortal(
     <Surface className="flex items-center gap-1 fixed bottom-6 right-6 z-[1] p-1">
