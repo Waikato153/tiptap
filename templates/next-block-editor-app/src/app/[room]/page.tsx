@@ -11,10 +11,6 @@ import { Surface } from '@/components/ui/Surface'
 import { Toolbar } from '@/components/ui/Toolbar'
 import { Icon } from '@/components/ui/Icon'
 import API from '@/lib/api';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/lib/store';
-import { setFileInfo, setFileInfoLoading, setFileInfoError } from '@/lib/slices/fileInfoSlice';
-
 
 
 const useDarkmode = () => {
@@ -53,18 +49,12 @@ export default function Document({ params }: { params: { room: string } }) {
   const [aiToken, setAiToken] = useState<string | null | undefined>()
   const searchParams = useSearchParams()
 
-
-  // 获取状态
-  const { data: fileInfo, loading: fileInfoLoading, error: fileInfoError } = useSelector((state: RootState) => state.fileInfo);
-
-  // 更新状态
-  const dispatch = useDispatch();
+  const [fileInfo, setFileinfo] = useState<any | null | undefined>()
 
 
   const hasCollab = parseInt(searchParams?.get('noCollab') as string) !== 1 && collabToken !== null
 
   const { room } = params
-
 
   useEffect(() => {
     // fetch data
@@ -102,33 +92,16 @@ export default function Document({ params }: { params: { room: string } }) {
   useEffect(() => {
     const fetchFileInfo = async () => {
       try {
-        dispatch(setFileInfoLoading(true))
-        dispatch(setFileInfoError(null))
-
-        const response = await API.getFileInfo(room)
-
-        if (typeof response.id != 'undefined') {
-          dispatch(setFileInfo(response))
-        } else {
-          dispatch(setFileInfoError(response.error || 'Failed to fetch file info'))
-          dispatch(setFileInfo(null))
-        }
-      } catch (error: any) {
-        let errorMessage = "An unexpected error occurred."
-        if (error.response?.data?.error) {
-          errorMessage = error.response.data.error
-        } else if (error.message) {
-          errorMessage = error.message
-        }
-        dispatch(setFileInfoError(errorMessage))
-        dispatch(setFileInfo(null))
-      } finally {
-        dispatch(setFileInfoLoading(false))
+        const data = await API.getFileInfo(room); // 等待异步函数的结果
+        setFileinfo(data); // 设置具体的值
+      } catch (error) {
+        console.error('Error fetching file info:', error);
+        setFileinfo(null); // 在出错时设置为 null 或其他默认值
       }
-    }
+    };
+    fetchFileInfo(); // 调用异步函数
+  }, [room]); // 当 room 改变时重新调用
 
-    fetchFileInfo()
-  }, [room, dispatch])
 
   useEffect(() => {
     // fetch data
@@ -209,26 +182,7 @@ export default function Document({ params }: { params: { room: string } }) {
     }
   }, [setProvider, collabToken, ydoc, room, hasCollab])
 
-  if ((hasCollab && !provider) || convertToken === undefined || aiToken === undefined || collabToken === undefined || !fileInfo) {
-    return (
-      <>
-        <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-black bg-opacity-95 dark:bg-opacity-95 z-1000">
-          <div className="flex flex-col items-center gap-4">
-            {fileInfoError ? (
-              <div className="text-red-500 dark:text-red-400 text-lg font-medium text-center max-w-md">
-                {fileInfoError}
-              </div>
-            ) : (
-              <div className="relative">
-                <div className="w-16 h-16 border-4 border-blue-500/20 dark:border-blue-400/20 rounded-full"></div>
-                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            )}
-          </div>
-        </div>
-      </>
-    );
-  }
+  if ((hasCollab && !provider) || convertToken === undefined || aiToken === undefined || collabToken === undefined || !fileInfo) return
 
   const DarkModeSwitcher = createPortal(
     <Surface className="flex items-center gap-1 fixed bottom-6 right-6 z-[1] p-1">
