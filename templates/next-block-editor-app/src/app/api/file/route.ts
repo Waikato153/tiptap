@@ -30,6 +30,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       },
     });
 
+    console.log(response)
+
+
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(

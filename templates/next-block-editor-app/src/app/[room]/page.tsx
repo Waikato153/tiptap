@@ -232,7 +232,7 @@ export default function Document({ params }: { params: { room: string } }) {
   return (
     <>
       {DarkModeSwitcher}
-      <BlockEditor fileInfo={fileInfo}  room={room} convertToken={convertToken ?? undefined}  aiToken={aiToken ?? undefined} hasCollab={hasCollab} ydoc={ydoc} provider={provider} />
+      <BlockEditor room={room} convertToken={convertToken ?? undefined}  aiToken={aiToken ?? undefined} hasCollab={hasCollab} ydoc={ydoc} provider={provider} />
     </>
   )
 }

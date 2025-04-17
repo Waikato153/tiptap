@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React, { useRef, useState, useCallback,useEffect } from 'react'
+
 import { styled, alpha } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import Menu, { MenuProps } from '@mui/material/Menu';
@@ -11,6 +12,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PagesIcon from '@mui/icons-material/Pages';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
+import { MakeaCopyModal } from '../modal/MakeaCopyModal';
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
@@ -55,7 +57,7 @@ const StyledMenu = styled((props: MenuProps) => (
   },
 }));
 
-export default function CustomizedMenus({ handleExport }: { handleExport?: () => void }) {
+export default function CustomizedMenus({room, handleExport }: { room?: string,  handleExport?: () => void }) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -70,8 +72,26 @@ export default function CustomizedMenus({ handleExport }: { handleExport?: () =>
     handleClose();
   };
 
+
+
+
+  const [copyModalOpen, setCopyModalOpen] = React.useState(false)
+
+  const showMakeaCopyModal = useCallback((open:boolean) => {
+    setCopyModalOpen(open)
+  }, [])
+
+  const handleMakeCopyClick = () => {
+    setCopyModalOpen(true)
+  };
+
   return (
-    <div>
+    <>
+      <MakeaCopyModal
+        room={room}
+        isOpen={copyModalOpen}
+        showMakeaCopyModal={showMakeaCopyModal}
+      />
       <Button
         id="demo-customized-button"
         aria-controls={open ? 'demo-customized-menu' : undefined}
@@ -99,7 +119,12 @@ export default function CustomizedMenus({ handleExport }: { handleExport?: () =>
           Cover Page
         </MenuItem>
 
+        <MenuItem onClick={handleMakeCopyClick} disableRipple>
+          <FileCopyIcon />
+          Make a Copy
+        </MenuItem>
+
       </StyledMenu>
-    </div>
+    </>
   );
 }

@@ -30,7 +30,6 @@ const style = {
 interface ExportModalProps {
   room?: string;
   isOpen: boolean;
-  editor: any;
   showCoverPageModal: (open: boolean) => void;
   tipsShow: (message: string, severity: AlertColor) => void;
 }
@@ -40,7 +39,6 @@ export const CoverPageModal = memo<ExportModalProps>(
      tipsShow,
      room,
      isOpen,
-     editor,
      showCoverPageModal
    }) =>
 
@@ -87,7 +85,7 @@ export const CoverPageModal = memo<ExportModalProps>(
     const [coverSubHeading, setcoverSubHeading] = React.useState('');
     const [coverAuthor, setcoverAuthor] = React.useState('');
     const [coverDate, setcoverDate] = React.useState(dayjs());
-
+   
     const [content, setContent] = React.useState('');
 
     const setShortContent = (content: string) => {
@@ -141,8 +139,8 @@ export const CoverPageModal = memo<ExportModalProps>(
               Cover Page Settings
             </Typography>
 
-            <FormControl fullWidth sx={{ mt: 2, mb: 2 }}>
-              <Grid container spacing={2}>
+            <FormControl fullWidth sx={{ mt: 2, mb: 2 }} >
+              <Grid container spacing={2} direction="column">
                 <Grid item xs={12}>
                   <TextField
                     fullWidth

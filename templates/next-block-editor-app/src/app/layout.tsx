@@ -2,6 +2,8 @@ import './globals.css'
 import './style.scss'
 import type { Metadata } from 'next'
 import { Providers } from './providers'
+import { SnackbarProvider } from '@/components/SnackbarTips/SnackbarTips';
+
 
 import 'cal-sans'
 
@@ -36,9 +38,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html className="h-full font-sans" lang="en">
       <body className="flex flex-col h-full">
-        <Providers>
-          <main className="h-full">{children}</main>
-        </Providers>
+        <SnackbarProvider>
+            <Providers>
+              <main className="h-full">{children}</main>
+          </Providers>
+        </SnackbarProvider>
       </body>
     </html>
   )

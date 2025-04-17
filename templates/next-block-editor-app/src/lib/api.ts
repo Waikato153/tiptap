@@ -18,7 +18,7 @@ export class API {
 
 
       // 发送 POST 请求到 /api/upload
-      const response = await fetch('/api/upload', {
+      const response = await fetch('./api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -63,7 +63,7 @@ export class API {
       };
 
 
-      const response = await fetch('/api/export', {
+      const response = await fetch('./api/export', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/html',
@@ -104,7 +104,7 @@ export class API {
 
   public static getConvertToken = async () => {
     try {
-      const response = await fetch('/api/getConvertToken', {
+      const response = await fetch('./api/getConvertToken', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ export class API {
     try {
       const credential = getCredential();
 
-      const response = await fetch('/api/tiptap', {
+      const response = await fetch('./api/tiptap', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ export class API {
     try {
       const credential = getCredential();
 
-      const response = await fetch('/api/tiptap', {
+      const response = await fetch('./api/tiptap', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export class API {
   public static getFileInfo = async (room: string) => {
     try {
       const credential = getCredential();
-      const response = await fetch(`/api/file?room=${room}`, {
+      const response = await fetch(`./api/file?room=${room}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -219,7 +219,7 @@ export class API {
     try {
       const credential = getCredential();
       console.log(credential)
-      const response = await fetch(`/api/setting?room=${room}`, {
+      const response = await fetch(`./api/setting?room=${room}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

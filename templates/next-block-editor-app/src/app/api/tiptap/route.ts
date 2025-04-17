@@ -3,11 +3,9 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 
-
-
-// 处理 POST 请求并生成 PDF
+ 
 export async function POST(req: NextRequest) {
-  const content = await req.text(); // 获取 HTML 内容
+  const content = await req.text();  
 
 
   if (!content) {
@@ -22,7 +20,7 @@ export async function POST(req: NextRequest) {
 
 
    try {
-  //   // 向 PHP 接口发起请求
+ 
    const phpApiUrl = "https://dev-portal.fluidbusinesssystems.co.nz/api2/editor/save_tiptap";
 
    //  const cloudfare = "https://browser-worker.winter-sunset-6f36.workers.dev";
@@ -31,22 +29,24 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       // @ts-ignore
       headers: {
-        'Content-Type': 'text/html', // 根据你的 PHP 接口需要设置头部
-        'Authorization': authstring, // 如果需要身份验证
+        'Content-Type': 'text/html',
+        'Authorization': authstring,
       },
-      body: content, // 直接将 HTML 内容作为请求体发送
+      body: content,
     });
+
+    console.log(response)
 
     if (!response.ok) {
       throw new Error(`PHP API returned an error: ${response.statusText}`);
     }
 
-     return NextResponse.json(123, { status: 200 });
+     return NextResponse.json(response, { status: 200 });
 
 
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    return NextResponse.json({ error: 'Error generating PDF' }, { status: 500 });
+    console.error('Error generating PDF:' + error);
+    return NextResponse.json({ error: error}, { status: 500 });
   }
 }
 
@@ -54,7 +54,6 @@ export async function POST(req: NextRequest) {
 export function GET(req: NextRequest): Promise<NextResponse> {
   return new Promise((resolve, reject) => {
     try {
-      // 从查询参数中获取文件名
       const { searchParams } = new URL(req.url);
       const fileName = searchParams.get('file');
 
@@ -63,11 +62,9 @@ export function GET(req: NextRequest): Promise<NextResponse> {
         return;
       }
 
-      // 构建文件的完整路径
+    
       const filePath = path.join(process.cwd(), '../../../upload/', fileName);
-      console.log(`Checking file at: ${filePath}`);
-
-      // 检查文件是否存在
+    
       fs.access(filePath, (err) => {
         if (err) {
           console.error('Error accessing file:', err);
@@ -77,7 +74,6 @@ export function GET(req: NextRequest): Promise<NextResponse> {
           console.log('File exists and is accessible.');
         }
 
-        // 文件存在，读取文件内容
         fs.readFile(filePath, (err, data) => {
           if (err) {
             console.error('Error reading file:', err);

@@ -756,7 +756,9 @@ input[type=text], textarea {
 }
 
 .tiptap p {
-  word-break: break-all
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .tiptap .collaboration-cursor__caret {
@@ -1030,3 +1032,9 @@ body:has(.dialog[data-state=open]) {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+
+.ProseMirror {
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
+}

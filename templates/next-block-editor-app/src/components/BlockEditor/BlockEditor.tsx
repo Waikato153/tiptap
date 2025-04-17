@@ -46,15 +46,16 @@ import CustomizedMenus from './components/Settings'
 import { CoverPageModal } from './modal/CoverPageModal'
 import {hoverOffThread, hoverThread} from "@tiptap-pro/extension-comments";
 
+import { useFileInfo } from '@/hooks/useFileInfo';
+
+
 export const BlockEditor = ({
-  fileInfo,
   room,
   convertToken,
   aiToken,
   ydoc,
   provider,
 }: {
-  fileInfo?:any,
   room?: string   // this is the document id
   convertToken?: string
   aiToken?: string
@@ -63,23 +64,22 @@ export const BlockEditor = ({
   provider?: TiptapCollabProvider | null | undefined
 }) => {
 
+  const { data: fileInfo} = useFileInfo();
+
 
   const menuContainerRef = useRef(null)
 
   const [showUnresolved, setShowUnresolved] = useState(true)
 
-
-
   const leftSidebar = useSidebar()
   const searchbar = useSearchbar()
   const userID = fileInfo?.user.user_id;
-
-
 
   // @ts-ignore
   const user = useUser(room, fileInfo)
 
   const userName = user?.name || 'Anonymous';
+ 
 
   const [latestVersion, setLatestVersion] = React.useState(null)
   const [currentVersion, setCurrentVersion] = React.useState(null)
@@ -374,7 +374,6 @@ export const BlockEditor = ({
         tipsShow={tipsShow}
         room={room}
         isOpen={coverModalOpen}
-        editor={editor}
         showCoverPageModal={showCoverModal}
       />
 
@@ -476,7 +475,7 @@ export const BlockEditor = ({
                     </Button>
                   </div>
 
-                  <CustomizedMenus handleExport={handleCoverExport} />
+                  <CustomizedMenus  room={room} handleExport={handleCoverExport} />
                 </div>
                 {/*{isLoading && <div className="hint purple-spinner">Processing...</div>}*/}
 
