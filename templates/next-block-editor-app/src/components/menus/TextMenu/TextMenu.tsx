@@ -13,6 +13,7 @@ import { useTextmenuContentTypes } from './hooks/useTextmenuContentTypes'
 import { ContentTypePicker } from './components/ContentTypePicker'
 //import { AIDropdown } from './components/AIDropdown'
 import { EditLinkPopover } from './components/EditLinkPopover'
+import { useFileInfo } from '@/hooks/useFileInfo'
 
 // We memorize the button so each button is not rerendered
 // on every editor state change
@@ -32,6 +33,7 @@ export const TextMenu = ({ editor, createThread,  currentVersion }: TextMenuProp
   const commands = useTextmenuCommands(editor)
   const states = useTextmenuStates(editor)
   const blockOptions = useTextmenuContentTypes(editor)
+  const { data: fileInfo} = useFileInfo();
 
   return (
     <BubbleMenu
@@ -144,9 +146,13 @@ export const TextMenu = ({ editor, createThread,  currentVersion }: TextMenuProp
             </Surface>
           </Popover.Content>
         </Popover.Root>
-        <MemoButton tooltip="Comment" onClick={() => createThread(currentVersion)}>
-          <Icon name="Chrome" />
-        </MemoButton>
+        
+        {fileInfo.publishornot === 1 && (
+          <MemoButton tooltip="Comment" onClick={() => createThread(currentVersion)}>
+            <Icon name="MessageSquare" />
+          </MemoButton>
+        )}
+
         <Popover.Root>
           <Popover.Trigger asChild>
             <MemoButton tooltip="More options">

@@ -2,7 +2,6 @@
 
 import LocalStorageHelper from './storageHelper';
 export const getCredential = (): string | null => {
-  // 确保代码在客户端运行
   if (typeof window === 'undefined') {
     console.error('getCredential should only be called on the client-side.');
     return null;

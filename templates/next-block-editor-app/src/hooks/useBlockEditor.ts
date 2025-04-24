@@ -7,7 +7,7 @@ import { TiptapCollabProvider, WebSocketStatus } from '@hocuspocus/provider'
 import type { Doc as YDoc } from 'yjs'
 
 import { ExtensionKit } from '@/extensions/extension-kit'
-import { userColors, userNames } from '../lib/constants'
+import { userColors } from '../lib/constants'
 import { randomElement } from '../lib/utils'
 import type { EditorUser } from '../components/BlockEditor/types'
 import { initialContent } from '@/lib/data/initialContent'
@@ -33,19 +33,18 @@ export const useBlockEditor = ({
   ydoc,
   provider,
   historyObject,
-  userId,
   userName = 'Maxi',
 }: {
   aiToken?: string
   ydoc: YDoc
   provider?: TiptapCollabProvider | null | undefined
   historyObject: object
-  userId?: string
   userName?: string
 }) => {
   const [collabState, setCollabState] = useState<WebSocketStatus>(
     provider ? WebSocketStatus.Connecting : WebSocketStatus.Disconnected,
   )
+
 
   const editor = useEditor(
     {
@@ -139,6 +138,7 @@ export const useBlockEditor = ({
       })
     },
   })
+
 
   useEffect(() => {
     provider?.on('status', (event: { status: WebSocketStatus }) => {

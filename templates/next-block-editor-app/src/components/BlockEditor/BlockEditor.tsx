@@ -46,17 +46,16 @@ import CustomizedMenus from './components/Settings'
 import { CoverPageModal } from './modal/CoverPageModal'
 import {hoverOffThread, hoverThread} from "@tiptap-pro/extension-comments";
 
-import { useFileInfo } from '@/hooks/useFileInfo';
-
+import { useFileInfo, useReadOnly } from '@/hooks/useFileInfo';
+import { useTips } from '@/hooks/useTips';
+import { useSelector } from 'react-redux'
 
 export const BlockEditor = ({
-  room,
   convertToken,
   aiToken,
   ydoc,
   provider,
 }: {
-  room?: string   // this is the document id
   convertToken?: string
   aiToken?: string
   hasCollab: boolean
@@ -65,21 +64,18 @@ export const BlockEditor = ({
 }) => {
 
   const { data: fileInfo} = useFileInfo();
-
-
+  const room = fileInfo.file_id;
   const menuContainerRef = useRef(null)
-
+  const isReadOnly = useReadOnly();
   const [showUnresolved, setShowUnresolved] = useState(true)
-
   const leftSidebar = useSidebar()
   const searchbar = useSearchbar()
-  const userID = fileInfo?.user.user_id;
 
   // @ts-ignore
-  const user = useUser(room, fileInfo)
+  const user = useUser()
 
   const userName = user?.name || 'Anonymous';
- 
+
 
   const [latestVersion, setLatestVersion] = React.useState(null)
   const [currentVersion, setCurrentVersion] = React.useState(null)
@@ -131,22 +127,24 @@ export const BlockEditor = ({
     setCommitDescription(event.target.value)
   }
 
-
-
-
   const threadClickHandler = (threadId: any) => {
-    // @ts-ignore
-    //
-    const isResolved = threadsRef.current.find(t => t.id === threadId)?.resolvedAt
+    try {
+      // @ts-ignore
+      const isResolved = threadsRef.current.find(t => t.id === threadId)?.resolvedAt
 
-    if (!threadId || isResolved) {
+      if (!threadId || isResolved) {
+        setSelectedThread(null)
+        editor.chain().unselectThread().run()
+        return
+      }
+
+      setSelectedThread(threadId)
+      editor.chain().selectThread({ id: threadId, updateSelection: false }).run()
+    } catch (error) {
+      console.error('Error handling thread click:', error)
       setSelectedThread(null)
       editor.chain().unselectThread().run()
-      return
     }
-
-    setSelectedThread(threadId)
-    editor.chain().selectThread({ id: threadId, updateSelection: false }).run()
   }
 
   const historyObject = {
@@ -161,7 +159,7 @@ export const BlockEditor = ({
   };
 
   // @ts-ignore
-  const { editor, users, collabState } = useBlockEditor({ aiToken, ydoc, provider, historyObject, userID,userName})
+  const { editor, users, collabState } = useBlockEditor({ aiToken, ydoc, provider, historyObject,userName})
 
 
   const { threads = [], createThread } = useThreads(provider, editor, user)
@@ -251,31 +249,6 @@ export const BlockEditor = ({
   const filteredThreads1 = filteredThreads ;
 
 
-  const [openSnack, setOpenSnack] = useState<{
-    open: boolean;
-    message: string;
-    severity: AlertColor;
-  }>({
-    open: false,
-    message: 'success',
-    severity: 'success'
-  });
-
-  const tipsShow = (message: string, severity: AlertColor) => {
-    setOpenSnack({
-      open: true,
-      message,
-      severity,
-    });
-  };
-
-  const handleClose = () => {
-    setOpenSnack((prev) => ({
-      ...prev,
-      open: false,
-    }));
-  };
-
   const handleExport = async () => {
     setExportModalOpen(true);
   };
@@ -324,7 +297,6 @@ export const BlockEditor = ({
   const handleSeach = () => {
     //onClick={}
     searchbar.open()
-
     setOpen(true);
   }
 
@@ -366,30 +338,19 @@ export const BlockEditor = ({
     // Add your share logic here
   }
 
-  // @ts-ignore
+
+  const { tipsShow, tipsOpen, tipMessage, severity, tipsHandleClose } = useTips();
+
   // @ts-ignore
   return (
     <>
-      <CoverPageModal
-        tipsShow={tipsShow}
-        room={room}
-        isOpen={coverModalOpen}
-        showCoverPageModal={showCoverModal}
-      />
+      <CoverPageModal tipsShow={tipsShow} room={room} isOpen={coverModalOpen} showCoverPageModal={showCoverModal}/>
 
-      <ExportModal
-        tipsShow={tipsShow}
-        room={room}
-        isOpen={exportModalOpen}
-        editor={editor}
-        showExportModal={showExportModal}
-      />
+      <ExportModal tipsShow={tipsShow} room={room} isOpen={exportModalOpen} editor={editor} showExportModal={showExportModal}/>
 
 
       <MetaDialog editor={editor} room={room} />
-      <SuccessSnackbar
-
-        open={openSnack.open} handleClose={handleClose} message={openSnack.message} severity={openSnack.severity} />
+      <SuccessSnackbar open={tipsOpen} handleClose={tipsHandleClose} message={tipMessage} severity={severity} />
 
       <ThreadsProvider
         onClickThread={selectThreadInEditor}
@@ -438,45 +399,48 @@ export const BlockEditor = ({
                     <Searchbar editor={editor} isOpen={open}/>
                 </Drawer>
 
-                <div className="flex py-2 flex-row justify-between gap-4" style={{maxWidth: '42rem', margin: '0 auto'}}>
 
-                  <div className="flex gap-4">
-                    <Button size="small"
-                      variant="contained"
-                            style={{ backgroundColor: isLoading ? 'gray' : undefined }}
-                      startIcon={<ImportExportIcon />}
+                {!isReadOnly && 
+                  <div className="flex py-2 flex-row justify-between gap-4" style={{maxWidth: '42rem', margin: '0 auto'}}>
 
-                      onClick={handleExport}>
-                      Export to PDF
-                    </Button>
+                    <div className="flex gap-4">
+                      <Button size="small"
+                        variant="contained"
+                              style={{ backgroundColor: isLoading ? 'gray' : undefined }}
+                        startIcon={<ImportExportIcon />}
 
-                    <Button size="small"
-                      variant="contained"
-                      startIcon={<CloudUploadIcon />}
-                      onClick={handleImportClick}
-                      loading={isImportLoading}
-                      loadingPosition="start"
-                    >
-                      Import Docx
-                      <input
-                        onChange={handleImportFilePick}
-                        type="file"
-                        accept=".docx"
-                        style={{ display: 'none' }}
-                        ref={importRef}
-                      />
-                    </Button>
+                        onClick={handleExport}>
+                        Export to PDF
+                      </Button>
 
-                    <Button onClick={handleSeach} size="small"
-                            variant="contained"
-                            startIcon={<SearchIcon />}
-                            >
-                      Search
-                    </Button>
+                      <Button size="small"
+                        variant="contained"
+                        startIcon={<CloudUploadIcon />}
+                        onClick={handleImportClick}
+                        loading={isImportLoading}
+                        loadingPosition="start"
+                      >
+                        Import Docx
+                        <input
+                          onChange={handleImportFilePick}
+                          type="file"
+                          accept=".docx"
+                          style={{ display: 'none' }}
+                          ref={importRef}
+                        />
+                      </Button>
+
+                      <Button onClick={handleSeach} size="small"
+                              variant="contained"
+                              startIcon={<SearchIcon />}
+                              >
+                        Search
+                      </Button>
+                    </div>
+
+                    <CustomizedMenus  room={room} handleExport={handleCoverExport} />
                   </div>
-
-                  <CustomizedMenus  room={room} handleExport={handleCoverExport} />
-                </div>
+                }
                 {/*{isLoading && <div className="hint purple-spinner">Processing...</div>}*/}
 
 
@@ -489,68 +453,63 @@ export const BlockEditor = ({
                 <TableColumnMenu editor={editor} appendTo={menuContainerRef} />
                 <ImageBlockMenu editor={editor} appendTo={menuContainerRef} />
               </div>
-              <div className="w-1/4 sidebar">
+              {!isReadOnly && 
+                <div className="w-1/4 sidebar">
+
+                {fileInfo.publishornot !== 0 && (
+                  <Accordion defaultExpanded>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" style={{border: '1px solid #f0f0f0',}}>
+                      <Typography component="span"
+
+                      >Comments</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography>
+                        <CommentHtml setShowUnresolved={setShowUnresolved} showUnresolved={showUnresolved}
+                                    provider={provider} filteredThreads={filteredThreads1} />
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+                )}
+                  <Accordion defaultExpanded={fileInfo.publishornot === 0}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls="panel2-content"
+                      id="panel2-header"
+                      style={{
+                        border: '1px solid #f0f0f0',
+
+                      }}
+                    >
+                      <Typography component="span"
+
+                      >Version History</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography>
+                        <VersionHtml
 
 
-                <Accordion defaultExpanded>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                    style={{
-                      border: '1px solid #f0f0f0',
-
-                    }}
-                  >
-                    <Typography component="span"
-
-                    >Comments</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography>
-                      <CommentHtml setShowUnresolved={setShowUnresolved} showUnresolved={showUnresolved}
-                                  provider={provider} filteredThreads={filteredThreads1} />
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-                <Accordion>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel2-content"
-                    id="panel2-header"
-                    style={{
-                      border: '1px solid #f0f0f0',
-
-                    }}
-                  >
-                    <Typography component="span"
-
-                    >Version History</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography>
-                      <VersionHtml
+                          versions={versions}
+                                    isAutoVersioning={isAutoVersioning}
+                                    hasChanges={hasChanges}
+                                    commitDescription={commitDescription}
+                                    provider={provider}
+                                    versioningModalOpen={versioningModalOpen}
+                                    editor={editor}
+                                    handleVersioningClose={handleVersioningClose}
+                                    handleRevert={handleRevert}
+                                    handleCommitDescriptionChange={handleCommitDescriptionChange}
+                                    handleNewVersion={handleNewVersion}
+                                    showVersioningModal={showVersioningModal}
+                        />
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
 
 
-                        versions={versions}
-                                  isAutoVersioning={isAutoVersioning}
-                                  hasChanges={hasChanges}
-                                  commitDescription={commitDescription}
-                                  provider={provider}
-                                  versioningModalOpen={versioningModalOpen}
-                                  editor={editor}
-                                  handleVersioningClose={handleVersioningClose}
-                                  handleRevert={handleRevert}
-                                  handleCommitDescriptionChange={handleCommitDescriptionChange}
-                                  handleNewVersion={handleNewVersion}
-                                  showVersioningModal={showVersioningModal}
-                      />
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-
-
-              </div>
+                </div>
+              }
             </div>
         </div>
       </div>

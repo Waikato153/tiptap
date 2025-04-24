@@ -57,7 +57,7 @@ function DynamicForm({editor, room, dform} : { editor: Editor; room: string|unde
 
     let data = {
       'data': fields,
-      action: 'variable', // 附加动作
+      action: 'variable',
       file_id: room,
       rtime: new Date().getTime()
     }
@@ -94,8 +94,15 @@ function DynamicForm({editor, room, dform} : { editor: Editor; room: string|unde
     <form onSubmit={handleSubmit}>
       <Grid container spacing={2}>
         {fields.map((field, index) => (
-          <Grid container item xs={12} spacing={2} key={index}>
-            <Grid item xs={5}>
+          <Grid
+            container
+            spacing={2}
+            key={index}
+            component="div"
+          >
+            <Grid
+              component="div"
+            >
               <TextField
                 label="Key"
                 name="key"
@@ -104,7 +111,9 @@ function DynamicForm({editor, room, dform} : { editor: Editor; room: string|unde
                 fullWidth
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid
+              component="div"
+            >
               <TextField
                 label="Value"
                 name="value"
@@ -114,13 +123,12 @@ function DynamicForm({editor, room, dform} : { editor: Editor; room: string|unde
               />
             </Grid>
             <Grid
-              item
-              xs={2}
+              component="div"
               sx={{
                 display: 'flex',
                 flexDirection: 'row',
-                justifyContent: 'center', // Center content vertically
-                alignItems: 'center',      // Center content horizontally
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
             >
               {canInsert(index) && (
@@ -143,9 +151,6 @@ function DynamicForm({editor, room, dform} : { editor: Editor; room: string|unde
                     </IconButton>
                   </Box>
 
-
-
-              {/* 只在最后一行显示 + 按钮 */}
               {index === fields.length - 1 && (
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                   <IconButton color="primary" onClick={handleAddField}>

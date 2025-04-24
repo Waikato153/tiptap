@@ -14,6 +14,7 @@ import API from '@/lib/api';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store';
 import { setFileInfo, setFileInfoLoading, setFileInfoError } from '@/lib/slices/fileInfoSlice';
+import { setReadOnly } from '@/lib/slices/editorSlice'
 
 
 const useDarkmode = () => {
@@ -58,12 +59,20 @@ export default function Document({ params }: { params: { room: string } }) {
   const hasCollab = parseInt(searchParams?.get('noCollab') as string) !== 1 && collabToken !== null
 
   const { room } = params
+ 
+  useEffect(() => {
+    const queryReadOnly = searchParams?.get('readonly');   
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    const hashReadOnly = hashParams.get('readonly');
+    const isReadOnly = queryReadOnly === '1' || hashReadOnly === '1';
+    dispatch(setReadOnly(isReadOnly));
+  }, [searchParams, dispatch]);
 
   useEffect(() => {
     // fetch data
     const dataFetch = async () => {
       try {
-        const response = await fetch('/api/collaboration', {
+        const response = await fetch('/api_document/collaboration', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -74,10 +83,7 @@ export default function Document({ params }: { params: { room: string } }) {
           throw new Error('No collaboration token provided, please set TIPTAP_COLLAB_SECRET in your environment')
         }
         const data = await response.json()
-
-
         const { token } = data
-
         // set state when the data received
         setCollabToken(token)
       } catch (e) {
@@ -97,12 +103,11 @@ export default function Document({ params }: { params: { room: string } }) {
       try {
         dispatch(setFileInfoLoading(true));
         dispatch(setFileInfoError(null));
-
-        const data = await API.getFileInfo(room);
+        const data = await API.getFileInfo(room);       
         dispatch(setFileInfo(data));
       } catch (error) {
-        console.error('Error fetching file info:', error);
-        dispatch(setFileInfoError('Failed to fetch file info'));
+        console.log(error);
+        dispatch(setFileInfoError(error.message))
         dispatch(setFileInfo(null));
       } finally {
         dispatch(setFileInfoLoading(false));
@@ -112,13 +117,12 @@ export default function Document({ params }: { params: { room: string } }) {
     fetchFileInfo();
   }, [room, dispatch]);
 
-
   useEffect(() => {
     // fetch data
     const dataFetch = async () => {
 
       try {
-        const response = await fetch('/api/ai', {
+        const response = await fetch('/api_document/ai', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -145,12 +149,10 @@ export default function Document({ params }: { params: { room: string } }) {
 
     dataFetch()
   }, [])
-
-
   useEffect(() => {
     const dataFetch = async () => {
     try {
-      const response = await fetch('/api/getConvertToken', {
+      const response = await fetch('/api_document/getConvertToken', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -202,11 +204,11 @@ export default function Document({ params }: { params: { room: string } }) {
             </div>
           ) : (
             <div className="relative">
-              {/* 外圈 */}
+              
               <div className="w-16 h-16 border-4 border-blue-500/20 dark:border-blue-400/20 rounded-full"></div>
-              {/* 内圈动画 */}
+              
               <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-              {/* 加载文字 */}
+              
               <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
                 Loading...
               </div>
@@ -232,7 +234,7 @@ export default function Document({ params }: { params: { room: string } }) {
   return (
     <>
       {DarkModeSwitcher}
-      <BlockEditor room={room} convertToken={convertToken ?? undefined}  aiToken={aiToken ?? undefined} hasCollab={hasCollab} ydoc={ydoc} provider={provider} />
+      <BlockEditor convertToken={convertToken ?? undefined}  aiToken={aiToken ?? undefined} hasCollab={hasCollab} ydoc={ydoc} provider={provider} />
     </>
   )
 }

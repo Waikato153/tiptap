@@ -1,15 +1,8 @@
 import {getCredential} from "@/lib/authHelper";
 import LocalStorageHelper from "@/lib/storageHelper";
-import {useState} from "react";
-import fs from "fs";
-import { leftArrow } from "@tiptap/extension-typography";
 
 export class API {
   public static uploadImage = async (_file: File) => {
-    // console.log(_file)
-    // console.log('11Image upload is disabled in the demo... Please implement the API.uploadImage method in your project.')
-    // await new Promise(r => setTimeout(r, 500))
-    // return '/placeholder-image.jpg'
 
     try {
       // 创建 FormData 对象，并将文件附加到其中
@@ -18,7 +11,7 @@ export class API {
 
 
       // 发送 POST 请求到 /api/upload
-      const response = await fetch('./api/upload', {
+      const response = await fetch('/api_document/upload', {
         method: 'POST',
         body: formData,
       });
@@ -27,21 +20,30 @@ export class API {
       if (response.ok) {
         const data = await response.json();
         console.log('Image uploaded successfully:', data);
-        return data.filePath; // 返回上传成功的文件路径
+        return data.filePath;
       } else {
         console.error('Image upload failed:', response.statusText);
-        return '/placeholder-image.jpg'; // 返回一个占位符图像路径
+        return '/placeholder-image.jpg';
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      return '/placeholder-image.jpg'; // 返回一个占位符图像路径
+      return '/placeholder-image.jpg';
     }
   }
 
   public static sendTokenToServer = async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    LocalStorageHelper.setItem('jwtToken', token);
+    //get from cookie first
+    const cookies = document.cookie.split(';');
+    const ctoken = cookies.find(cookie => cookie.trim().startsWith('jwtToken='));
+    const token = ctoken ? ctoken.trim().split('=')[1] : null;
+    if (token) {
+      LocalStorageHelper.setItem('jwtToken', token);
+    } else {
+      //if empty get from url
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      LocalStorageHelper.setItem('jwtToken', token);
+    }
   }
 
   public static getToken = () => {
@@ -63,7 +65,7 @@ export class API {
       };
 
 
-      const response = await fetch('./api/export', {
+      const response = await fetch('/api_document/export', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/html',
@@ -104,7 +106,7 @@ export class API {
 
   public static getConvertToken = async () => {
     try {
-      const response = await fetch('./api/getConvertToken', {
+      const response = await fetch('/api_document/getConvertToken', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,16 +137,16 @@ export class API {
     try {
       const credential = getCredential();
 
-      const response = await fetch('./api/tiptap', {
+      const response = await fetch('/api_document/tiptap', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `${credential}`,
         },
         body: JSON.stringify({
-          content_html: html, // HTML 内容
+          content_html: html,
           content_json: json,
-          action: 'save', // 附加动作
+          action: 'save',
           file_id: room,
           rtime: new Date().getTime()
         }),
@@ -164,7 +166,7 @@ export class API {
     try {
       const credential = getCredential();
 
-      const response = await fetch('./api/tiptap', {
+      const response = await fetch('/api_document/tiptap', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,9 +191,9 @@ export class API {
 
 
   public static getFileInfo = async (room: string) => {
-    try {
+    
       const credential = getCredential();
-      const response = await fetch(`./api/file?room=${room}`, {
+      const response = await fetch(`/api_document/file?room=${room}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -199,27 +201,32 @@ export class API {
         },
       })
 
-      if (!response.ok) {
-        throw new Error('No collaboration token provided, please set TIPTAP_COLLAB_SECRET in your environment')
+      // Handle specific HTTP status codes
+      if (response.status === 401) {
+        throw new Error('Unauthorized access (401). Please log in again or contact the administrator.');
       }
+
+      if (response.status === 500) {
+        throw new Error('Internal Server Error (500). Please try again later or contact the administrator.');
+      }
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}. Please contact the administrator.`);
+      }
+  
       const data = await response.json();
 
+    
       // set state when the data received
       return data;
-    } catch (e) {
-      if (e instanceof Error) {
-        console.error(e.message)
-      }
-
-      return
-    }
+   
   }
 
   public static getSettings = async (room: string|undefined) => {
     try {
       const credential = getCredential();
       console.log(credential)
-      const response = await fetch(`./api/setting?room=${room}`, {
+      const response = await fetch(`/api_document/setting?room=${room}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

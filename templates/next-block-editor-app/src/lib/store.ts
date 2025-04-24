@@ -1,10 +1,12 @@
 // lib/store.ts
 import { configureStore } from '@reduxjs/toolkit';
 import fileInfoReducer from './slices/fileInfoSlice';
+import editorReducer from './slices/editorSlice';
 
 export const store = configureStore({
   reducer: {
     fileInfo: fileInfoReducer,
+    editor: editorReducer,
   },
 });
 

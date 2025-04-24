@@ -8,10 +8,7 @@ import {Box, Button, Typography, Modal, Checkbox, FormControlLabel, AlertColor, 
 import FormControl from '@mui/material/FormControl';
 import DatePickerComponent from '../components/DatePickerComponent';
 import dayjs from 'dayjs';
-import {EditorContent, useEditor} from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import {TiptapCollabProvider} from "@hocuspocus/provider";
-import ExtensionKit from "@/extensions/extension-kit";
+
 
 import SimpleEditor from "../components/SimpleEditor";
 
@@ -85,7 +82,7 @@ export const CoverPageModal = memo<ExportModalProps>(
     const [coverSubHeading, setcoverSubHeading] = React.useState('');
     const [coverAuthor, setcoverAuthor] = React.useState('');
     const [coverDate, setcoverDate] = React.useState(dayjs());
-   
+
     const [content, setContent] = React.useState('');
 
     const setShortContent = (content: string) => {
@@ -141,7 +138,7 @@ export const CoverPageModal = memo<ExportModalProps>(
 
             <FormControl fullWidth sx={{ mt: 2, mb: 2 }} >
               <Grid container spacing={2} direction="column">
-                <Grid item xs={12}>
+                <Grid>
                   <TextField
                     fullWidth
                     id="cover-heading"
@@ -170,7 +167,7 @@ export const CoverPageModal = memo<ExportModalProps>(
                     }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid>
                   <TextField
                     fullWidth
                     id="cover-subheading"
@@ -199,7 +196,7 @@ export const CoverPageModal = memo<ExportModalProps>(
                     }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid>
 
 
                   <FormControl fullWidth>
@@ -215,7 +212,7 @@ export const CoverPageModal = memo<ExportModalProps>(
 
               </Grid>
 
-                <Grid item xs={12}>
+                <Grid>
                   <TextField
                     fullWidth
                     id="cover-author"
@@ -244,7 +241,7 @@ export const CoverPageModal = memo<ExportModalProps>(
                     }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid >
                   <DatePickerComponent
                     value={coverDate}
                     onChange={(newValue) => setcoverDate(newValue??dayjs())}
