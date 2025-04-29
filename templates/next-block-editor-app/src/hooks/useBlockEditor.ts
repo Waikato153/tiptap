@@ -16,10 +16,11 @@ import { initialContent } from '@/lib/data/initialContent'
 //import { ThreadsKit } from '@tiptap-pro/extension-comments'
 import API from '@/lib/api';
 import { debounce } from 'lodash';
+import { useFileInfo, useReadOnly } from './useFileInfo'
 
 const debouncedSave = debounce((content2, contentJSON, room: string) => {
   API.saveTip(content2, contentJSON, room);
-}, 4000); // 延迟 500ms
+}, 4000);
 
 declare global {
   interface Window {
@@ -44,53 +45,57 @@ export const useBlockEditor = ({
   const [collabState, setCollabState] = useState<WebSocketStatus>(
     provider ? WebSocketStatus.Connecting : WebSocketStatus.Disconnected,
   )
+  const isReadOnly = useReadOnly ();
+
+  const { data: fileInfo} = useFileInfo();
 
 
   const editor = useEditor(
     {
+      editable: !isReadOnly,
       immediatelyRender: true,
       shouldRerenderOnTransaction: false,
-      autofocus: true,
+      autofocus: !isReadOnly,
       onCreate: ctx => {
-
         if (provider && !provider.isSynced) {
           provider.on('synced', () => {
             setTimeout(() => {
               if (ctx.editor.isEmpty) {
-                ctx.editor.commands.setContent(initialContent)
+                ctx.editor.commands.setContent(fileInfo.content_html)
               }
             }, 0)
           })
         } else if (ctx.editor.isEmpty) {
-          ctx.editor.commands.setContent(initialContent)
-          ctx.editor.commands.focus('start', { scrollIntoView: true })
+          ctx.editor.commands.setContent(fileInfo.content_html)
+          if (!isReadOnly) {
+            ctx.editor.commands.focus('start', { scrollIntoView: true })
+          }
         }
       },
       onUpdate: ({ editor }) => {
-        const content = editor.getJSON(); // 获取更新后的文档内容
-
-        const content2 = editor.getHTML();
-        // @ts-ignore
-        debouncedSave(content2, JSON.stringify(content), historyObject.room);
+        if (!isReadOnly) {
+          const content = editor.getJSON();
+          const content2 = editor.getHTML();
+          // @ts-ignore
+          debouncedSave(content2, JSON.stringify(content), historyObject.room);
+        }
       },
       extensions: [
         ...ExtensionKit({
           provider, historyObject
         }),
 
-        provider
+        !isReadOnly && provider
           ? Collaboration.configure({
               document: ydoc,
             })
           : undefined,
-        provider
+        !isReadOnly && provider
           ? CollaborationCursor.configure({
               provider,
               user: {
-                //name: randomElement(userNames),
                 color: randomElement(userColors),
-                name:userName,
-
+                name: userName,
               },
             })
           : undefined,

@@ -66,6 +66,28 @@ export default function Document({ params }: { params: { room: string } }) {
     const hashReadOnly = hashParams.get('readonly');
     const isReadOnly = queryReadOnly === '1' || hashReadOnly === '1';
     dispatch(setReadOnly(isReadOnly));
+
+    if (isReadOnly) {
+      const handleContextMenu = (e: MouseEvent) => {
+        e.preventDefault();
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('contextmenu', handleContextMenu);
+      document.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.removeEventListener('contextmenu', handleContextMenu);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+
+
   }, [searchParams, dispatch]);
 
   useEffect(() => {
@@ -178,6 +200,7 @@ export default function Document({ params }: { params: { room: string } }) {
     dataFetch();
   }, [])
 
+  
 
   const ydoc = useMemo(() => new YDoc(), [])
 

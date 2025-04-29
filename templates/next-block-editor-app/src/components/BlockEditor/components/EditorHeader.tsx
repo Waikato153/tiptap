@@ -6,7 +6,7 @@ import { Toolbar } from '@/components/ui/Toolbar'
 import { Editor } from '@tiptap/core'
 import { useEditorState } from '@tiptap/react'
 import { useState, useRef, useEffect } from 'react'
-import { useFileInfo } from '@/hooks/useFileInfo'
+import { useFileInfo, useReadOnly } from '@/hooks/useFileInfo'
 import API from "@/lib/api";
 
 export type EditorHeaderProps = {
@@ -27,7 +27,7 @@ export const EditorHeader = ({ editor, collabState, users, isSidebarOpen, toggle
   })
  
 
-
+  const isReadOnly = useReadOnly();
   const { data: fileInfo} = useFileInfo();
 
   const [isEditing, setIsEditing] = useState(false)
@@ -96,23 +96,23 @@ export const EditorHeader = ({ editor, collabState, users, isSidebarOpen, toggle
         <div className="flex-1 text-center">
           <div
             ref={divRef}
-            contentEditable={isEditing}
-            onBlur={handleSave}
-            onKeyDown={handleKeyDown}
-            onClick={() => setIsEditing(true)}
-            title="Rename"
+            contentEditable={!isReadOnly && isEditing}
+            onBlur={!isReadOnly ? handleSave : undefined}
+            onKeyDown={!isReadOnly ? handleKeyDown : undefined}
+            onClick={!isReadOnly ? () => setIsEditing(true) : undefined}
+            title={!isReadOnly ? "Rename" : undefined}
             className={`
               w-[270px]
               bg-transparent 
               text-left
               border-0
-              hover:border hover:border-gray-300 dark:hover:border-gray-600
-              focus:border focus:border-blue-500 dark:focus:border-blue-400
+              ${!isReadOnly ? 'hover:border hover:border-gray-300 dark:hover:border-gray-600' : ''}
+              ${!isReadOnly ? 'focus:border focus:border-blue-500 dark:focus:border-blue-400' : ''}
               rounded
               px-2 py-1
               outline-none
               transition-colors
-              ${isEditing ? 'cursor-text' : 'cursor-pointer'}
+              ${!isReadOnly && isEditing ? 'cursor-text' : 'cursor-default'}
               whitespace-nowrap overflow-hidden
             `}
             suppressContentEditableWarning

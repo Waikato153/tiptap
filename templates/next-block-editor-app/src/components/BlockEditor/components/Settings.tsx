@@ -83,6 +83,7 @@ export default function CustomizedMenus({room, handleExport }: { room?: string, 
 
   const handleMakeCopyClick = () => {
     setCopyModalOpen(true)
+    handleClose();
   };
 
   return (

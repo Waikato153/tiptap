@@ -48,7 +48,6 @@ import {hoverOffThread, hoverThread} from "@tiptap-pro/extension-comments";
 
 import { useFileInfo, useReadOnly } from '@/hooks/useFileInfo';
 import { useTips } from '@/hooks/useTips';
-import { useSelector } from 'react-redux'
 
 export const BlockEditor = ({
   convertToken,
@@ -128,23 +127,18 @@ export const BlockEditor = ({
   }
 
   const threadClickHandler = (threadId: any) => {
-    try {
-      // @ts-ignore
-      const isResolved = threadsRef.current.find(t => t.id === threadId)?.resolvedAt
+    // @ts-ignore
+    //
+    const isResolved = threadsRef.current.find(t => t.id === threadId)?.resolvedAt
 
-      if (!threadId || isResolved) {
-        setSelectedThread(null)
-        editor.chain().unselectThread().run()
-        return
-      }
-
-      setSelectedThread(threadId)
-      editor.chain().selectThread({ id: threadId, updateSelection: false }).run()
-    } catch (error) {
-      console.error('Error handling thread click:', error)
+    if (!threadId || isResolved) {
       setSelectedThread(null)
       editor.chain().unselectThread().run()
+      return
     }
+
+    setSelectedThread(threadId)
+    editor.chain().selectThread({ id: threadId, updateSelection: false }).run()
   }
 
   const historyObject = {
@@ -378,7 +372,7 @@ export const BlockEditor = ({
               toggleSidebar={leftSidebar.toggle}
             />
             <div className="overflow-y-auto flex p-2">
-              <div className="w-3/4 p-2">
+            <div className={`${isReadOnly ? 'w-full' : 'w-3/4'} p-2`}>
 
                 <Drawer
 
@@ -445,71 +439,75 @@ export const BlockEditor = ({
 
 
                 <EditorContent editor={editor}  />
-                <ContentItemMenu editor={editor} />
-                <LinkMenu editor={editor} appendTo={menuContainerRef} />
-                <TextMenu editor={editor} createThread={createThread} currentVersion={currentVersion} />
-                <ColumnsMenu editor={editor} appendTo={menuContainerRef} />
-                <TableRowMenu editor={editor} appendTo={menuContainerRef} />
-                <TableColumnMenu editor={editor} appendTo={menuContainerRef} />
-                <ImageBlockMenu editor={editor} appendTo={menuContainerRef} />
+                {!isReadOnly &&
+                  <>
+                  <ContentItemMenu editor={editor} />
+                  <LinkMenu editor={editor} appendTo={menuContainerRef} />
+                  <TextMenu editor={editor} createThread={createThread} currentVersion={currentVersion} />
+                  <ColumnsMenu editor={editor} appendTo={menuContainerRef} />
+                  <TableRowMenu editor={editor} appendTo={menuContainerRef} />
+                  <TableColumnMenu editor={editor} appendTo={menuContainerRef} />
+                  <ImageBlockMenu editor={editor} appendTo={menuContainerRef} />
+                  </>
+                }
               </div>
               {!isReadOnly && 
-                <div className="w-1/4 sidebar">
+              <div className="w-1/4 sidebar">
 
-                {fileInfo.publishornot !== 0 && (
-                  <Accordion defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" style={{border: '1px solid #f0f0f0',}}>
-                      <Typography component="span"
+              {fileInfo.publishornot !== 0 && (
+                <Accordion defaultExpanded>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" style={{border: '1px solid #f0f0f0',}}>
+                    <Typography component="span"
 
-                      >Comments</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography>
-                        <CommentHtml setShowUnresolved={setShowUnresolved} showUnresolved={showUnresolved}
-                                    provider={provider} filteredThreads={filteredThreads1} />
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-                )}
-                  <Accordion defaultExpanded={fileInfo.publishornot === 0}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls="panel2-content"
-                      id="panel2-header"
-                      style={{
-                        border: '1px solid #f0f0f0',
+                    >Comments</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography>
+                      <CommentHtml setShowUnresolved={setShowUnresolved} showUnresolved={showUnresolved}
+                                  provider={provider} filteredThreads={filteredThreads1} />
+                    </Typography>
+                  </AccordionDetails>
+                </Accordion>
+              )}
+                <Accordion defaultExpanded={fileInfo.publishornot === 0}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel2-content"
+                    id="panel2-header"
+                    style={{
+                      border: '1px solid #f0f0f0',
 
-                      }}
-                    >
-                      <Typography component="span"
+                    }}
+                  >
+                    <Typography component="span"
 
-                      >Version History</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography>
-                        <VersionHtml
-
-
-                          versions={versions}
-                                    isAutoVersioning={isAutoVersioning}
-                                    hasChanges={hasChanges}
-                                    commitDescription={commitDescription}
-                                    provider={provider}
-                                    versioningModalOpen={versioningModalOpen}
-                                    editor={editor}
-                                    handleVersioningClose={handleVersioningClose}
-                                    handleRevert={handleRevert}
-                                    handleCommitDescriptionChange={handleCommitDescriptionChange}
-                                    handleNewVersion={handleNewVersion}
-                                    showVersioningModal={showVersioningModal}
-                        />
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
+                    >Version History</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography>
+                      <VersionHtml
 
 
-                </div>
-              }
+                        versions={versions}
+                                  isAutoVersioning={isAutoVersioning}
+                                  hasChanges={hasChanges}
+                                  commitDescription={commitDescription}
+                                  provider={provider}
+                                  versioningModalOpen={versioningModalOpen}
+                                  editor={editor}
+                                  handleVersioningClose={handleVersioningClose}
+                                  handleRevert={handleRevert}
+                                  handleCommitDescriptionChange={handleCommitDescriptionChange}
+                                  handleNewVersion={handleNewVersion}
+                                  showVersioningModal={showVersioningModal}
+                      />
+                    </Typography>
+                  </AccordionDetails>
+                </Accordion>
+
+
+              </div>
+            }
             </div>
         </div>
       </div>
