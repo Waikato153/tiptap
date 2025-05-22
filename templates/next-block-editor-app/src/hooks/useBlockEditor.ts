@@ -7,10 +7,8 @@ import { TiptapCollabProvider, WebSocketStatus } from '@hocuspocus/provider'
 import type { Doc as YDoc } from 'yjs'
 
 import { ExtensionKit } from '@/extensions/extension-kit'
-import { userColors } from '../lib/constants'
-import { randomElement } from '../lib/utils'
+
 import type { EditorUser } from '../components/BlockEditor/types'
-import { initialContent } from '@/lib/data/initialContent'
 // import { Ai } from '@/extensions/Ai'
 // import { AiImage, AiWriter } from '@/extensions'
 //import { ThreadsKit } from '@tiptap-pro/extension-comments'
@@ -29,47 +27,47 @@ declare global {
 }
 
 
+
 export const useBlockEditor = ({
   aiToken,
   ydoc,
   provider,
   historyObject,
-  userName = 'Maxi',
+  UserObject,
 }: {
   aiToken?: string
   ydoc: YDoc
   provider?: TiptapCollabProvider | null | undefined
   historyObject: object
-  userName?: string
+  UserObject?: object
 }) => {
   const [collabState, setCollabState] = useState<WebSocketStatus>(
     provider ? WebSocketStatus.Connecting : WebSocketStatus.Disconnected,
   )
+
   const isReadOnly = useReadOnly ();
-
   const { data: fileInfo} = useFileInfo();
-
+  let composing = false;
 
   const editor = useEditor(
     {
-      editable: !isReadOnly,
+      editable: false,
       immediatelyRender: true,
       shouldRerenderOnTransaction: false,
-      autofocus: !isReadOnly,
+      autofocus: false,
+      content: fileInfo.content_html?.trim() ? fileInfo.content_html : null,
       onCreate: ctx => {
         if (provider && !provider.isSynced) {
           provider.on('synced', () => {
             setTimeout(() => {
               if (ctx.editor.isEmpty) {
-                ctx.editor.commands.setContent(fileInfo.content_html)
+                ctx.editor.commands.setContent(null)
               }
             }, 0)
           })
         } else if (ctx.editor.isEmpty) {
-          ctx.editor.commands.setContent(fileInfo.content_html)
-          if (!isReadOnly) {
-            ctx.editor.commands.focus('start', { scrollIntoView: true })
-          }
+          ctx.editor.commands.setContent(null)
+          ctx.editor.commands.focus('start', { scrollIntoView: true })
         }
       },
       onUpdate: ({ editor }) => {
@@ -78,6 +76,8 @@ export const useBlockEditor = ({
           const content2 = editor.getHTML();
           // @ts-ignore
           debouncedSave(content2, JSON.stringify(content), historyObject.room);
+        } else {
+
         }
       },
       extensions: [
@@ -85,7 +85,7 @@ export const useBlockEditor = ({
           provider, historyObject
         }),
 
-        !isReadOnly && provider
+         provider
           ? Collaboration.configure({
               document: ydoc,
             })
@@ -93,10 +93,7 @@ export const useBlockEditor = ({
         !isReadOnly && provider
           ? CollaborationCursor.configure({
               provider,
-              user: {
-                color: randomElement(userColors),
-                name: userName,
-              },
+              user: UserObject,
             })
           : undefined,
         // aiToken
@@ -119,8 +116,64 @@ export const useBlockEditor = ({
           autocorrect: 'off',
           autocapitalize: 'off',
           class: 'min-h-full',
-
         },
+        handleDOMEvents: {
+          compositionstart: () => {
+            composing = true
+            return false
+          },
+          compositionend: () => {
+            composing = false
+            return false
+          },
+          beforeinput: (view, event) => {
+            if (isReadOnly) {
+              event.preventDefault()
+              return true
+            }
+            return false
+          },
+          input: (view, event) => {
+            if (composing && isReadOnly ) {
+              setTimeout(() => {
+                editor.commands.undo()
+              }, 0)
+              return true
+            }
+            return false
+          },
+          keydown(view, event) {
+            if (isReadOnly) {
+              event.preventDefault()
+              return true
+            }
+          },
+          copy: (view, event) => {
+            if (isReadOnly) {
+              event.preventDefault()
+              return true
+            }
+          },
+          cut: (view, event) => {
+            if (isReadOnly) {
+              event.preventDefault()
+              return true
+            }
+          },
+          click: (view, event) => {
+            if (isReadOnly) {
+              editor.view.dom.classList.remove('ProseMirror-focused')
+              event.preventDefault()
+              return true
+            }
+          },
+          contextmenu: (view, event) => {
+            if (isReadOnly) {
+              event.preventDefault()
+              return true
+            }
+          }
+        }
       },
 
     },
@@ -143,6 +196,13 @@ export const useBlockEditor = ({
       })
     },
   })
+
+
+  useEffect(() => {
+    if (editor && !isReadOnly) {
+      editor.setEditable(true);
+    }
+  }, [editor, isReadOnly]);
 
 
   useEffect(() => {

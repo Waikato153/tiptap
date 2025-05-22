@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import {useReadOnly} from "@/hooks/useFileInfo";
 
 export type SidebarState = {
   isOpen: boolean
@@ -8,7 +9,14 @@ export type SidebarState = {
 }
 
 export const useSidebar = (): SidebarState => {
-  const [isOpen, setIsOpen] = useState(false)
+  const isReadOnly = useReadOnly();
+
+  let expand = false;
+  if (isReadOnly) {
+    expand = true
+  }
+
+  const [isOpen, setIsOpen] = useState(expand)
   return useMemo(() => {
     return {
       isOpen,

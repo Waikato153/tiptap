@@ -1,0 +1,466 @@
+@charset "UTF-8";
+.tiptap :first-child {
+  margin-top: 0
+}
+
+.tiptap ul,.tiptap ol {
+  padding: 0 1rem;
+  margin: 1.25rem 1rem 1.25rem .4rem
+}
+
+.tiptap ul li p,.tiptap ol li p {
+  margin-top: .25em;
+  margin-bottom: .25em
+}
+
+.tiptap h1,.tiptap h2,.tiptap h3,.tiptap h4,.tiptap h5,.tiptap h6 {
+  line-height: 1.1;
+  margin-top: 2.5rem;
+  text-wrap: pretty
+}
+
+.tiptap h1,.tiptap h2 {
+  margin-top: 3.5rem;
+  margin-bottom: 1.5rem
+}
+
+.tiptap h1 {
+  font-size: 1.4rem
+}
+
+.tiptap h2 {
+  font-size: 1.2rem
+}
+
+.tiptap h3 {
+  font-size: 1.1rem
+}
+
+.tiptap h4,.tiptap h5,.tiptap h6 {
+  font-size: 1rem
+}
+
+.tiptap code {
+  background-color: var(--purple-light);
+  border-radius: .4rem;
+  color: var(--black);
+  font-size: .85rem;
+  padding: .25em .3em
+}
+
+.tiptap pre {
+  background: var(--black);
+  border-radius: .5rem;
+  color: var(--white);
+  font-family: JetBrainsMono,monospace;
+  margin: 1.5rem 0;
+  padding: .75rem 1rem
+}
+
+.tiptap pre code {
+  background: none;
+  color: inherit;
+  font-size: .8rem;
+  padding: 0
+}
+
+.tiptap blockquote {
+  border-left: 3px solid var(--gray-3);
+  margin: 1.5rem 0;
+  padding-left: 1rem
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid var(--gray-2);
+  margin: 2rem 0
+}
+
+.tiptap .is-empty:before {
+  color: var(--gray-4);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none
+}
+
+.tiptap img {
+  display: block;
+  height: auto;
+  margin: 1.5rem 0;
+  max-width: 100%
+}
+
+.tiptap img.ProseMirror-selectednode {
+  outline: 3px solid var(--purple)
+}
+
+.tiptap .collaboration-cursor__caret {
+  border-left: 1px solid #0d0d0d;
+  border-right: 1px solid #0d0d0d;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal
+}
+
+.tiptap .collaboration-cursor__label {
+  border-radius: 3px 3px 3px 0;
+  color: #0d0d0d;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  left: -1px;
+  line-height: normal;
+  padding: .1rem .3rem;
+  position: absolute;
+  top: -1.4em;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  white-space: nowrap
+}
+
+.tiptap .tiptap-thread,.tiptap .tiptap-thread * {
+  transition: all .2s cubic-bezier(.65,.05,.36,1)
+}
+
+.tiptap .tiptap-thread[data-type=block]:first-child {
+  margin-top: 0
+}
+
+.tiptap .tiptap-thread[data-type=block]>:not(p,h1,h2,h3,h4,h5,h6,ul,li) {
+  outline-width: 2px;
+  outline-color: transparent;
+  outline-style: dashed
+}
+
+body {
+  overflow: hidden
+}
+
+body .main {
+  height: 100vh;
+  overflow: auto
+}
+
+
+
+@media (max-width: 540px) {
+  body .sidebar {
+    padding-bottom:0;
+    width: 100%
+  }
+}
+
+.threads-group {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin: 0 -1rem;
+  overflow: auto;
+  padding: 0 1rem
+}
+
+@media (max-width: 540px) {
+  .threads-group {
+    margin:0 -1.5rem;
+    max-height: 40vh;
+    padding: 0 1.5rem 1.5rem;
+    width: calc(100% + 3rem)
+  }
+}
+
+.threads-group .thread {
+  border-radius: .5rem;
+  box-shadow: 0 0 0 1px var(--gray-3) inset;
+  display: flex;
+  flex-direction: column;
+  transition: all .2s cubic-bezier(.65,.05,.36,1)
+}
+
+.threads-group .thread.is-active,.threads-group .thread:hover {
+  box-shadow: 0 0 0 1px var(--gray-4) inset
+}
+
+.threads-group .thread.is-open {
+  box-shadow: 0 0 0 1px var(--purple) inset
+}
+
+.threads-group .thread .header-group {
+  border-bottom: 1px solid var(--gray-3);
+  padding: .375rem .5rem
+}
+
+.threads-group .thread .header-group button {
+  background-color: unset
+}
+
+.threads-group .thread .header-group button:hover {
+  background-color: var(--gray-2)
+}
+
+.threads-group .thread .hint {
+  align-items: center;
+  background-color: var(--yellow-light);
+  border: 1px solid var(--gray-2);
+  border-radius: .5rem;
+  display: flex;
+  flex-direction: row;
+  font-size: .75rem;
+  gap: .5rem;
+  line-height: 1.15;
+  min-height: 1.75rem;
+  padding: .25rem .5rem;
+  margin: .8rem .8rem 0
+}
+
+.threads-group .thread:not(.is-open) .comments-group .comment:not(:last-child) {
+  padding-bottom: 0
+}
+
+.threads-group .thread:not(.is-open) .comments-group .comment .comment-content p {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  align-self: stretch;
+  display: -webkit-box
+}
+
+.threads-group .thread:not(.is-open) .comments-group .comment .comment-content .button-group {
+  display: none
+}
+
+.threads-group .thread:not(.is-open) .comments-group .comment .comment-content label {
+  display: inherit
+}
+
+.threads-group .thread:not(.is-open) .comments-group .comments-count {
+  margin-top: .2rem
+}
+
+.threads-group .thread .comments-group {
+  display: flex;
+  flex-direction: column;
+  padding: .8rem
+}
+
+.threads-group .thread .comments-group .comment {
+  display: flex;
+  flex-direction: column;
+  gap: .125rem
+}
+
+.threads-group .thread .comments-group .comment.deleted {
+  opacity: .5
+}
+
+.threads-group .thread .comments-group .comment:not(:first-child) {
+  border-top: 1px solid var(--gray-3);
+  padding-top: .75rem
+}
+
+.threads-group .thread .comments-group .comment:not(:last-child) {
+  padding-bottom: .75rem
+}
+
+.threads-group .thread .comments-group .comment .comment-edit {
+  padding: unset
+}
+
+.threads-group .thread .comments-group .comment .comment-content {
+  display: flex;
+  flex-direction: column;
+  gap: .625rem
+}
+
+.threads-group button {
+  font-size: .75rem;
+  padding: .25rem .375rem;
+  border-radius: .375rem
+}
+
+.threads-group .button-group {
+  gap: .125rem
+}
+
+.threads-group label {
+  color: var(--gray-5);
+  font-size: .75rem;
+  font-weight: 400
+}
+
+.threads-group p {
+  font-size: .75rem;
+  line-height: 1.4;
+  margin: 0;
+  overflow: hidden
+}
+
+.threads-group .label-group {
+  -moz-column-gap: .25rem;
+  column-gap: .25rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap
+}
+
+.threads-group .label-group label:not(:first-child):before {
+  content: "·";
+  padding-right: .25rem
+}
+
+.threads-group .label-group label:first-of-type {
+  font-weight: 700;
+  color: var(--black)
+}
+
+.threads-group .reply-group,.threads-group .comment-edit {
+  display: flex;
+  flex-direction: column;
+  gap: .375rem;
+  padding: .2rem .8rem .8rem
+}
+
+.threads-group .reply-group textarea,.threads-group .comment-edit textarea {
+  height: 4.5rem;
+  resize: none;
+  padding: .375rem .625rem;
+  line-height: 1.3;
+  width: 100%
+}
+
+.threads-group .reply-group textarea:focus,.threads-group .reply-group textarea:focus-visible,.threads-group .comment-edit textarea:focus,.threads-group .comment-edit textarea:focus-visible {
+  border-color: var(--black)
+}
+
+.threads-group .reply-group .flex-row,.threads-group .comment-edit .flex-row {
+  -moz-column-gap: .5rem;
+  column-gap: .5rem;
+  row-gap: .25rem
+}
+
+.threads-group .reply-group:not(:has(textarea:focus)) .flex-row {
+  display: none
+}
+
+.threads-group .reply-group textarea:-moz-placeholder-shown:not(:focus) {
+  height: 2rem
+}
+
+.threads-group .reply-group textarea:placeholder-shown:not(:focus) {
+  height: 2rem
+}
+
+.threads-group .reply-group textarea:not(:-moz-placeholder-shown) {
+  height: 4.5rem
+}
+
+.threads-group .reply-group textarea:not(:placeholder-shown) {
+  height: 4.5rem
+}
+
+.threads-group .reply-group:has(textarea:not(:-moz-placeholder-shown)) .flex-row {
+  display: flex
+}
+
+.threads-group .reply-group:has(textarea:not(:placeholder-shown)) .flex-row {
+  display: flex
+}
+
+.col-group {
+  display: flex;
+  flex-direction: row
+}
+
+@media (max-width: 540px) {
+  .col-group {
+    flex-direction:column-reverse
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  width: 100%
+}
+
+.sidebar {
+  border-left: 1px solid var(--gray-3);
+  flex-grow: 0;
+  flex-shrink: 0;
+  padding: 0 1rem;
+  position: sticky;
+  height: 100vh;
+  top: 0;
+}
+
+@media (max-width: 540px) {
+  .sidebar {
+    border-bottom:1px solid var(--gray-3);
+    border-left: unset;
+    width: 100%;
+    height: auto;
+    position: unset;
+    padding: 1.5rem
+  }
+}
+
+.sidebar-options {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+  position: sticky;
+  top: 1rem
+}
+
+.option-group {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: .625rem;
+  width: 100%
+}
+
+.option-group form,.option-group form input {
+  width: 100%
+}
+
+[data-viewmode=open] .tiptap .tiptap-thread[data-status-all=open][data-type=block]>:not(p,h1,h2,h3,h4,h5,h6,ul,li) {
+  background-color: var(--yellow);
+  outline-color: var(--yellow)
+}
+
+[data-viewmode=open] .tiptap .tiptap-thread[data-status-all=open][data-type=block]:hover>:not(p,h1,h2,h3,h4,h5,h6,ul,li),[data-viewmode=open] .tiptap .tiptap-thread[data-status-all=open][data-type=block][data-state=selected]>:not(p,h1,h2,h3,h4,h5,h6,ul,li),[data-viewmode=open] .tiptap .tiptap-thread[data-status-all=open][data-type=block][data-state=hovered]>:not(p,h1,h2,h3,h4,h5,h6,ul,li) {
+  background-color: var(--yellow-contrast);
+  outline-color: var(--yellow-contrast)
+}
+
+[data-viewmode=open] .tiptap .tiptap-thread[data-status-all=open][data-type=inline] {
+  border-bottom: 2px dashed var(--yellow-contrast)
+}
+
+[data-viewmode=open] .tiptap .tiptap-thread[data-status-all=open][data-type=inline]:hover,[data-viewmode=open] .tiptap .tiptap-thread[data-status-all=open][data-type=inline][data-state=selected],[data-viewmode=open] .tiptap .tiptap-thread[data-status-all=open][data-type=inline][data-state=hovered] {
+  background-color: var(--yellow)
+}
+
+[data-viewmode=resolved] .tiptap .tiptap-thread[data-status=closed][data-type=block]>:not(p,h1,h2,h3,h4,h5,h6,ul,li) {
+  background-color: var(--yellow);
+  outline-color: var(--yellow)
+}
+
+[data-viewmode=resolved] .tiptap .tiptap-thread[data-status=closed][data-type=block]:hover>:not(p,h1,h2,h3,h4,h5,h6,ul,li),[data-viewmode=resolved] .tiptap .tiptap-thread[data-status=closed][data-type=block][data-state=selected]>:not(p,h1,h2,h3,h4,h5,h6,ul,li),[data-viewmode=resolved] .tiptap .tiptap-thread[data-status=closed][data-type=block][data-state=hovered]>:not(p,h1,h2,h3,h4,h5,h6,ul,li) {
+  background-color: var(--yellow-contrast);
+  outline-color: var(--yellow-contrast)
+}
+
+[data-viewmode=resolved] .tiptap .tiptap-thread[data-status=closed][data-type=inline] {
+  border-bottom: 2px dashed var(--yellow-contrast)
+}
+
+[data-viewmode=resolved] .tiptap .tiptap-thread[data-status=closed][data-type=inline]:hover,[data-viewmode=resolved] .tiptap .tiptap-thread[data-status=closed][data-type=inline][data-state=selected],[data-viewmode=resolved] .tiptap .tiptap-thread[data-status=closed][data-type=inline][data-state=hovered] {
+  background-color: var(--yellow)
+}

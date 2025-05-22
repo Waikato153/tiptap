@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 
 
 import SimpleEditor from "../components/SimpleEditor";
+import {useSnackbar} from "@/components/SnackbarTips/SnackbarTips";
 
 const style = {
   position: 'absolute',
@@ -28,12 +29,10 @@ interface ExportModalProps {
   room?: string;
   isOpen: boolean;
   showCoverPageModal: (open: boolean) => void;
-  tipsShow: (message: string, severity: AlertColor) => void;
 }
 
 export const CoverPageModal = memo<ExportModalProps>(
   ({
-     tipsShow,
      room,
      isOpen,
      showCoverPageModal
@@ -52,11 +51,14 @@ export const CoverPageModal = memo<ExportModalProps>(
             const response = await API.getSettings(room);
 
             if (typeof response['cover_page'] != undefined) {
+
               setContent(response['cover_page']['cover_content']);
               setCoverHeading(response['cover_page']['cover_heading']);
               setcoverSubHeading(response['cover_page']['cover_subheading']);
               setcoverAuthor(response['cover_page']['cover_author']);
-              setcoverDate(dayjs(response['cover_page']['cover_date'], 'DD/MM/YYYY'));
+              if (response['cover_page']['cover_date']) {
+                setcoverDate(dayjs(response['cover_page']['cover_date'], 'DD/MM/YYYY'));
+              }
 
             }
 
@@ -70,6 +72,7 @@ export const CoverPageModal = memo<ExportModalProps>(
       }
     }, [isOpen]);
 
+    const { showMessage } = useSnackbar();
     const handleOpen = () => {showCoverPageModal(true)};
     const handleClose = () => {
       if (isLoading) return
@@ -113,10 +116,11 @@ export const CoverPageModal = memo<ExportModalProps>(
 
 
         if (result == true){
-          tipsShow('Save success', 'success');
+          showMessage('Save success', 'success');
         }else{
-          tipsShow('Save failed', 'error');
+          showMessage('Save failed', 'error');
         }
+
 
       } catch (error) {
         console.error('Error saving cover page:', error);
@@ -129,7 +133,7 @@ export const CoverPageModal = memo<ExportModalProps>(
     return (
       <div>
 
-        <Modal open={isOpen} onClose={handleClose}>
+        <Modal open={isOpen} onClose={handleClose} sx={{zIndex: 2000111}}>
           <Box sx={style}>
 
             <Typography variant="h6" component="h2" sx={{ color: 'black' }}>

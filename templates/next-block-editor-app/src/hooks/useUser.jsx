@@ -8,9 +8,10 @@ export const useUser = () => {
   const { data: fileInfo} = useFileInfo();
   const userName = fileInfo?.user?.name_first + ' ' + fileInfo?.user?.name_last;
   return {
+    id: fileInfo?.user?.id,
     name: userName,
     color: userColor,
-    room: fileInfo.file_id,
+    room: fileInfo?.file_id,
     file: fileInfo
   }
 }

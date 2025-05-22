@@ -2,9 +2,9 @@
 
 import { Editor as CoreEditor } from '@tiptap/core'
 import { memo } from 'react'
-import { TableOfContentsStorage } from '@tiptap-pro/extension-table-of-contents'
 import { cn } from '@/lib/utils'
 import { useEditorState } from '@tiptap/react'
+import { useReadOnly } from '@/hooks/useFileInfo'
 
 export type TableOfContentsProps = {
   editor: CoreEditor
@@ -12,9 +12,24 @@ export type TableOfContentsProps = {
 }
 
 export const TableOfContents = memo(({ editor, onItemClick }: TableOfContentsProps) => {
+  const isReadOnly = useReadOnly()
+
   const content = useEditorState({
     editor,
-    selector: ctx => (ctx.editor.storage.tableOfContents as TableOfContentsStorage).content,
+    selector: ctx => {
+      const headings: Array<{id: string; level: number; textContent: string; isActive: boolean}> = []
+      ctx.editor.state.doc.descendants((node, pos) => {
+        if (node.type.name === 'heading') {
+          headings.push({
+            id: node.attrs.id || `heading-${pos}`,
+            level: node.attrs.level,
+            textContent: node.textContent,
+            isActive: false
+          })
+        }
+      })
+      return headings
+    },
   })
 
   return (
@@ -35,7 +50,7 @@ export const TableOfContents = memo(({ editor, onItemClick }: TableOfContentsPro
                 item.isActive && 'text-neutral-800 bg-neutral-100 dark:text-neutral-100 dark:bg-neutral-900',
               )}
             >
-              {item.itemIndex}. {item.textContent}
+              {item.textContent}
             </a>
           ))}
         </div>

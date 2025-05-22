@@ -366,7 +366,7 @@ button[disabled], input[disabled], select[disabled], textarea[disabled] {
   flex-shrink: 0;
   padding: 1rem;
   position: sticky;
-  height: 100vh;
+  height: 100%;
   top: 0;
 
 }
@@ -618,60 +618,6 @@ input[type=text], textarea {
     transition: all 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
   }
 
-  .tiptap-thread--block {
-    &:first-child {
-      margin-top: 0;
-    }
-
-    &:not(.tiptap-thread--resolved) {
-      > :not(p, h1, h2, h3, h4, h5, h6, ul, li) {
-        background-color: var(--yellow);
-
-        &:hover,
-        &.tiptap-thread--selected,
-        &.tiptap-thread--hovered {
-          background-color: var(--yellow-contrast);
-        }
-      }
-
-      :is(p, h1, h2, h3, h4, h5, h6, ul, li) {
-        &:not(:has(.tiptap-thread--inline)) {
-          background-color: var(--yellow-light);
-          border-bottom: 2px dashed var(--yellow-contrast);
-
-          &:hover {
-            background-color: var(--yellow);
-          }
-        }
-      }
-
-      &.tiptap-thread--selected,
-      &.tiptap-thread--hovered {
-        :is(p, h1, h2, h3, h4, h5, h6, ul, li) {
-          &:not(:has(.tiptap-thread--inline)) {
-            background-color: var(--yellow);
-          }
-        }
-      }
-    }
-  }
-
-  .tiptap-thread--inline {
-    &:not(.tiptap-thread--resolved) {
-      border-bottom: 2px dashed var(--yellow-contrast);
-
-      &:hover,
-      &.tiptap-thread--selected,
-      &.tiptap-thread--hovered {
-        background-color: var(--yellow);
-      }
-    }
-  }
-}
-
-
-.tiptap :first-child {
-  margin-top: 0
 }
 
 .tiptap ul,.tiptap ol {
@@ -1031,8 +977,6 @@ body:has(.dialog[data-state=open]) {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
-
-
 .ProseMirror {
   word-break: normal;
   overflow-wrap: break-word;

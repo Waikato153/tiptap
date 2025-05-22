@@ -8,6 +8,7 @@
   "description": "Templates for an advanced block editor using Tiptap",
   "scripts": {
     "dev": "npm run dev --prefix ./templates/next-block-editor-app",
+    "start": "npm run start --prefix ./templates/next-block-editor-app",
     "dev:simple-editor": "npm run dev --prefix ./templates/react-simple-editor",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run build --prefix ./templates/next-block-editor-app",

@@ -187,7 +187,7 @@ export const GROUPS: Group[] = [
         description: 'Insert a table of contents',
         //shouldBeHidden: editor => editor.isActive('columns'),
         action: editor => {
-          editor.chain().focus().showModal().run();
+          editor.chain().focus().showModal('show-modal').run();
         },
       },
     ],

@@ -1,5 +1,6 @@
 import './globals.css'
 import './style.scss'
+import './comment.css'
 import type { Metadata } from 'next'
 import { Providers } from './providers'
 import { SnackbarProvider } from '@/components/SnackbarTips/SnackbarTips';

@@ -1,10 +1,13 @@
 import { WebSocketStatus } from '@hocuspocus/provider'
-import { memo } from 'react'
+import React, { memo } from 'react'
 import { EditorUser } from '../types'
 import { cn } from '../../../lib/utils'
 import { getConnectionText } from '../../../lib/utils/getConnectionText'
 import Tooltip from '../../ui/Tooltip'
 import { useReadOnly } from '@/hooks/useFileInfo'
+import {Button} from "@mui/material";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 export type EditorInfoProps = {
   characters: number
@@ -16,7 +19,6 @@ export type EditorInfoProps = {
 export const EditorInfo = memo(({ characters, collabState, users, words }: EditorInfoProps) => {
   const isReadOnly = useReadOnly();
 
-  console.log(users)
   return (
     <div className="flex items-center">
       <div className={`flex flex-col justify-center pr-4 ${!isReadOnly ? 'mr-4 text-right border-r border-neutral-200 dark:border-neutral-800' : ''}`}>
@@ -65,10 +67,27 @@ export const EditorInfo = memo(({ characters, collabState, users, words }: Edito
                   </div>
                 )}
               </div>
+
+              <Button size="small"
+                      variant="contained"
+                      startIcon={<ExitToAppIcon />}
+                      onClick={() => {
+                        if (window.self !== window.top) {
+                          window.parent.postMessage('closeEditor', '*');
+                        } else {
+                          window.close();
+                        }
+                      }}
+                      style={{ marginLeft: '1rem' }}
+                      color="error">
+                Exit
+              </Button>
             </div>
+
           )}
         </>
       )}
+
     </div>
   )
 })

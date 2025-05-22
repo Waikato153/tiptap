@@ -53,7 +53,7 @@ export default function SimpleEditor({ content, setShortContent }: {
   return (
   <div className="editor" style={{ marginTop: '40px', border: '1px solid #ccc', backgroundColor:'rgb(239 236 235 / 5%)',borderRadius: '4px', height: '40%', overflowY: 'auto' }}>
     <EditorContent className="editor__content" editor={editorNew} />
-    {editorNew && <TextMenu editor={editorNew}  createThread={() => {}} currentVersion={0}/>}
+    {editorNew && <TextMenu showComment={false} editor={editorNew}/>}
   </div>
 );
 }

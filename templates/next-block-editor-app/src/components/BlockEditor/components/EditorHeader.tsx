@@ -102,7 +102,8 @@ export const EditorHeader = ({ editor, collabState, users, isSidebarOpen, toggle
             onClick={!isReadOnly ? () => setIsEditing(true) : undefined}
             title={!isReadOnly ? "Rename" : undefined}
             className={`
-              w-[270px]
+              min-w-[100px]
+              max-w-[400px]
               bg-transparent 
               text-left
               border-0

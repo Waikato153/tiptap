@@ -4,18 +4,17 @@ import '@tiptap/extension-text-style'
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     showModal: {
-      showModal: () => ReturnType
+      showModal: (eventName: string) => ReturnType
     }
   }
 }
-
+//'show-modal'   modal in slashCommand
 export const ShowModal = Extension.create({
   name: 'showModal',
   addCommands() {
     return {
-      showModal: () => () => {
-        // 自定义的模态框触发逻辑
-        const event = new CustomEvent('show-modal')
+      showModal: (eventName: string) => () => {
+        const event = new CustomEvent(eventName)
         window.dispatchEvent(event)
         return true
       },

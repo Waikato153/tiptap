@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { subscribeToThreads } from '@tiptap-pro/extension-comments'
 
 import API from '@/lib/api'
 
@@ -39,22 +40,46 @@ export const useThreads = (provider, editor, user) => {
     }
   }, [provider])
 
-  const createThread = useCallback((currentVersion) => {
-    const input = window.prompt('Comment content')
+  useEffect(() => {
+    if (provider) {
+      const unsubscribe = subscribeToThreads({
+        provider,
+        callback: currentThreads => {
 
-    if (!input) {
-      return
+          console.log('currentThreads', currentThreads)
+
+          let data = {
+            'data': currentThreads,
+            action: 'comment',
+            file_id: user.room,
+            rtime: new Date().getTime()
+          }
+
+          API.saveExtraToEditor(user.room, data)
+
+          setThreads(currentThreads)
+        },
+      })
+
+      return () => {
+        unsubscribe()
+      }
     }
+  }, [provider])
+
+  const createThread = useCallback((input, currentVersion) => {
 
     if (!editor) {
-      return
+      return false;
     }
-
     editor.chain().focus().setThread({
-
-      content: input, commentData: { userName: user.name,
+      content: input, commentData: {
+        userId: user.id,
+        userName: user.name,
         version: currentVersion,
       } }).run()
+
+    return true
   }, [editor, user])
 
   const removeThread = useCallback(() => {

@@ -5,8 +5,7 @@ import { memo } from 'react';
 import { Box, Button, Typography, Modal, Checkbox, FormControlLabel,AlertColor } from '@mui/material';
 
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-
+import {useSnackbar} from "@/components/SnackbarTips/SnackbarTips";
 
 const style = {
     position: 'absolute',
@@ -25,13 +24,11 @@ interface ExportModalProps {
     isOpen: boolean;
     editor: any;
     showExportModal: (open: boolean) => void;
-    tipsShow: (message: string, severity: AlertColor) => void;
 }
 
 
 export const ExportModal = memo<ExportModalProps>(
     ({
-    tipsShow,
     room,
     isOpen,
     editor,
@@ -41,15 +38,16 @@ export const ExportModal = memo<ExportModalProps>(
     {
 
 
-    const handleOpen = () => {showExportModal(true)};
-    const handleClose = () => {
-        if (isLoading) return
-        showExportModal(false)
-    };
+      const handleOpen = () => {showExportModal(true)};
+      const { showMessage } = useSnackbar();
+      const handleClose = () => {
+          if (isLoading) return
+          showExportModal(false)
+      };
 
-    const [isLoading, setIsLoading] = useState(false)
+      const [isLoading, setIsLoading] = useState(false)
 
-    const handleExport = async () => {
+      const handleExport = async () => {
 
         const html = editor.getHTML();
 
@@ -63,9 +61,9 @@ export const ExportModal = memo<ExportModalProps>(
           setIsLoading(false)
 
           if (result == 0){
-            tipsShow('Export failed', 'error');
+            showMessage('Export failed', 'error');
           }else{
-            tipsShow('Export success', 'success');
+            showMessage('Export success', 'success');
           }
         } catch (Error) {
 

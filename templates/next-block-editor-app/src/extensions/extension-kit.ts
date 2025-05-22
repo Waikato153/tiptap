@@ -58,7 +58,11 @@ import { isChangeOrigin } from '@tiptap/extension-collaboration'
 import CollaborationHistory from '@tiptap-pro/extension-collaboration-history'
 import { Import } from '@tiptap-pro/extension-import'
 
+
 import { SearchAndReplace } from "@sereneinserenade/tiptap-search-and-replace";
+
+
+import { useFileInfo, useReadOnly } from '@/hooks/useFileInfo';
 
 interface ExtensionKitProps {
   provider?: TiptapCollabProvider | null,
@@ -66,12 +70,21 @@ interface ExtensionKitProps {
 }
 
 
+
+
 // @ts-ignore
 // @ts-ignore
 // @ts-ignore
 // @ts-ignore
 // @ts-ignore
-export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => [
+export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => {
+  const isReadOnly = useReadOnly();
+  const appId = process.env.NEXT_PUBLIC_TIPTAP_CONVERT_APPID;
+
+  const { data: fileInfo} = useFileInfo();
+
+
+  let extensions =  [
   Document,
   Columns,
   TaskList,
@@ -169,7 +182,7 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
     showOnlyCurrent: false,
     placeholder: () => '',
   }),
-  SlashCommand,
+  ...(!isReadOnly ? [SlashCommand] : []),
   Focus,
   Figcaption,
   BlockquoteFigure,
@@ -177,19 +190,9 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
     width: 2,
     class: 'ProseMirror-dropcursor border-black',
   }),
-  CommentsKit.configure({
-    provider: provider,
 
-  }),
+    ...(fileInfo.publishornot==0 ? [SlashCommand] : []),
 
-  CommentsKit.configure({
-    provider,
-    useLegacyWrapping: false,
-    onClickThread: threadId => {
-      // @ts-ignore
-      historyObject.threadClickHandler(threadId);
-    },
-  }),
 
 
   CollaborationHistory.configure({
@@ -217,13 +220,18 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
 
   Import.configure({
     // The Convert App-ID from the Convert settings page: https://cloud.tiptap.dev/convert-settings
-    appId: 'xm41ppym',
+    appId: appId,
 
     // The JWT token you generated in the previous step
     //token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzM2ODg0NTgsIm5iZiI6MTczMzY4ODQ1OCwiZXhwIjoxNzMzNzc0ODU4LCJpc3MiOiJodHRwczovL2Nsb3VkLnRpcHRhcC5kZXYiLCJhdWQiOiJiYWU0NjkxZS0zYjQ0LTQzOGMtYjZjZi1jYTZlMGNiNDU5ODUifQ.AVYqzAwEjCh1YL-2U4nQ1bCdIKyWHjeJC9CMehPVbJs',
     // @ts-ignore
-    token: historyObject.convertToken
+    token: historyObject.convertToken,
     //token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzM3MDI3MTR9.vZWycjkRUnAcSoBrndVHmLGjV9nClivAslqCw9noPdY'
+    experimentalDocxImport: true,
+
+    //endpoint: 'https://api-demo.tiptap.dev/v1/convert/import-docx?gfm=1&',
+    //
+    // imageUploadCallbackUrl: 'https://dev-portal.fluidbusinesssystems.co.nz/api/',
   }),
 
   SearchAndReplace.configure({
@@ -233,10 +241,22 @@ export const ExtensionKit = ({ provider, historyObject }: ExtensionKitProps) => 
     disableRegex: false, // also no need to explain
 
   }),
-
-
-
-
 ]
+  const draftMode = fileInfo?.publishornot;
+  if (draftMode == 0) {
+    extensions.push(
+      CommentsKit.configure({
+        provider,
+        useLegacyWrapping: false,
+        onClickThread: threadId => {
+          // @ts-ignore
+          historyObject.threadClickHandler(threadId);
+        },
+      }),
+    )
+  }
+
+  return extensions
+}
 
 export default ExtensionKit

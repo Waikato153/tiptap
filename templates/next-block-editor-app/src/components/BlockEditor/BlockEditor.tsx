@@ -29,7 +29,8 @@ import CollaborationHistory from '@tiptap-pro/extension-collaboration-history'
 import { VersioningModal } from './components/VersioningModal'
 import VersionHtml from "./components/Version";
 import CommentHtml from "./components/CommentHtml";
-import MetaDialog from "./components/MetaDialog";
+import MetaDialog from "./modal/MetaDialog";
+import {CommentModal} from "./modal/CommentModal";
 import API from '@/lib/api'
 import {Searchbar} from "@/components/Searchbar";
 
@@ -39,7 +40,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import SearchIcon from '@mui/icons-material/Search';
 import {CloudUploadIcon} from "lucide-react";
-import SuccessSnackbar from "@/components/ui/Snackbar/IntegrationNotistack";
 
 import {ExportModal} from "./modal/ExportModal";
 import CustomizedMenus from './components/Settings'
@@ -47,7 +47,8 @@ import { CoverPageModal } from './modal/CoverPageModal'
 import {hoverOffThread, hoverThread} from "@tiptap-pro/extension-comments";
 
 import { useFileInfo, useReadOnly } from '@/hooks/useFileInfo';
-import { useTips } from '@/hooks/useTips';
+import {useSnackbar} from "@/components/SnackbarTips/SnackbarTips";
+
 
 export const BlockEditor = ({
   convertToken,
@@ -65,6 +66,7 @@ export const BlockEditor = ({
   const { data: fileInfo} = useFileInfo();
   const room = fileInfo.file_id;
   const menuContainerRef = useRef(null)
+  const textMenuContainerRef = useRef<HTMLDivElement>(null);
   const isReadOnly = useReadOnly();
   const [showUnresolved, setShowUnresolved] = useState(true)
   const leftSidebar = useSidebar()
@@ -111,11 +113,11 @@ export const BlockEditor = ({
     }
 
     // @ts-ignore
-    provider.on('synced', onSynced)
+    provider && provider.on('synced', onSynced)
 
     return () => {
       // @ts-ignore
-      provider.off('synced', onSynced)
+      provider && provider.off('synced', onSynced)
       ydoc.off('update', onUpdate)
     }
   }, [ydoc])
@@ -129,7 +131,7 @@ export const BlockEditor = ({
   const threadClickHandler = (threadId: any) => {
     // @ts-ignore
     //
-    const isResolved = threadsRef.current.find(t => t.id === threadId)?.resolvedAt
+    const isResolved = threads.find(t => t.id === threadId)?.resolvedAt
 
     if (!threadId || isResolved) {
       setSelectedThread(null)
@@ -153,7 +155,7 @@ export const BlockEditor = ({
   };
 
   // @ts-ignore
-  const { editor, users, collabState } = useBlockEditor({ aiToken, ydoc, provider, historyObject,userName})
+  const { editor, users, collabState } = useBlockEditor({ aiToken, ydoc, provider, historyObject,user})
 
 
   const { threads = [], createThread } = useThreads(provider, editor, user)
@@ -164,7 +166,12 @@ export const BlockEditor = ({
 
   // @ts-ignore
   const selectThreadInEditor = useCallback(threadId => {
-    editor.chain().selectThread({ id: threadId }).run()
+    editor.chain().selectThread({ id: threadId }).scrollIntoView().run();
+    const { node } = editor.view.domAtPos(
+      editor.state.selection.anchor
+    );
+    node instanceof HTMLElement &&
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [editor])
 
   // @ts-ignore
@@ -205,6 +212,7 @@ export const BlockEditor = ({
     return null
   }
 
+  const { showMessage } = useSnackbar();
 
   const handleNewVersion = useCallback((e: React.FormEvent) => {
     e.preventDefault()
@@ -213,7 +221,7 @@ export const BlockEditor = ({
     }
     editor.commands.saveVersion(commitDescription)
     setCommitDescription('')
-    alert(`Version ${commitDescription} created! Open the version history to see all versions.`)
+    showMessage(`Version ${commitDescription} created! Open the version history to see all versions.`, 'success');
     setHasChanges(false)
   }, [editor, commitDescription])
 
@@ -223,9 +231,6 @@ export const BlockEditor = ({
 
   // @ts-ignore
   const handleRevert = useCallback((version, versionData) => {
-
-    console.log(version)
-
     const versionTitle = versionData ? versionData.name || renderDate(versionData.date) : version
 
     editor.commands.revertToVersion(version, `Revert to ${versionTitle}`, `Unsaved changes before revert to ${versionTitle}`)
@@ -239,9 +244,7 @@ export const BlockEditor = ({
   // @ts-ignore
   const filteredThreads = threads.filter(t => (showUnresolved ? !t.resolvedAt : !!t.resolvedAt))
 
-
   const filteredThreads1 = filteredThreads ;
-
 
   const handleExport = async () => {
     setExportModalOpen(true);
@@ -279,7 +282,7 @@ export const BlockEditor = ({
           file,
           onImport(context) {
             // @ts-ignore
-            context.setEditorContent()
+            context.setEditorContent(context.content)
             setIsImportLoading(false)
           },
         }).run()
@@ -291,6 +294,8 @@ export const BlockEditor = ({
   const handleSeach = () => {
     //onClick={}
     searchbar.open()
+    editor.storage.searchModal = 1;
+    console.log(editor.storage)
     setOpen(true);
   }
 
@@ -316,35 +321,19 @@ export const BlockEditor = ({
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
+    editor.storage.searchModal = 0;
   };
-
-  const handleBackdropClick = (event: React.MouseEvent) => {
-    if (event.target === event.currentTarget) {
-      setOpen(false);
-    }
-  };
-
-  const handleSave = () => {
-    // Add your save logic here
-  }
-
-  const handleShare = () => {
-    // Add your share logic here
-  }
-
-
-  const { tipsShow, tipsOpen, tipMessage, severity, tipsHandleClose } = useTips();
-
   // @ts-ignore
   return (
     <>
-      <CoverPageModal tipsShow={tipsShow} room={room} isOpen={coverModalOpen} showCoverPageModal={showCoverModal}/>
+      <CoverPageModal room={room} isOpen={coverModalOpen} showCoverPageModal={showCoverModal}/>
 
-      <ExportModal tipsShow={tipsShow} room={room} isOpen={exportModalOpen} editor={editor} showExportModal={showExportModal}/>
+      <ExportModal room={room} isOpen={exportModalOpen} editor={editor} showExportModal={showExportModal}/>
 
 
       <MetaDialog editor={editor} room={room} />
-      <SuccessSnackbar open={tipsOpen} handleClose={tipsHandleClose} message={tipMessage} severity={severity} />
+      <CommentModal editor={editor} room={room} createThread={createThread} currentVersion={currentVersion} />
+
 
       <ThreadsProvider
         onClickThread={selectThreadInEditor}
@@ -354,162 +343,163 @@ export const BlockEditor = ({
         onResolveThread={resolveThread}
         onUpdateComment={updateComment}
         onUnresolveThread={unresolveThread}
-        selectedThreads={editor.storage.comments.focusedThreads}
+        selectedThreads={editor.storage?.comments?.focusedThreads}
         selectedThread={selectedThread}
         setSelectedThread={setSelectedThread}
         threads={threads}
       >
+        <div className="flex h-full" ref={menuContainerRef}  data-viewmode={showUnresolved ? 'open' : 'resolved'}>
 
-        <div className="flex h-full" ref={menuContainerRef}>
+            <Sidebar isOpen={leftSidebar.isOpen} onClose={leftSidebar.close} editor={editor} />
+            <div className="relative flex flex-col flex-1 h-full overflow-hidden">
+              <EditorHeader
+                editor={editor}
+                collabState={collabState}
+                users={users}
+                isSidebarOpen={leftSidebar.isOpen}
+                toggleSidebar={leftSidebar.toggle}
+              />
+              <div className="overflow-y-auto flex p-2">
+              <div className={`${isReadOnly ? 'w-full' : 'w-3/4'} p-2`}>
 
-          <Sidebar isOpen={leftSidebar.isOpen} onClose={leftSidebar.close} editor={editor} />
-          <div className="relative flex flex-col flex-1 h-full overflow-hidden">
-            <EditorHeader
-              editor={editor}
-              collabState={collabState}
-              users={users}
-              isSidebarOpen={leftSidebar.isOpen}
-              toggleSidebar={leftSidebar.toggle}
-            />
-            <div className="overflow-y-auto flex p-2">
-            <div className={`${isReadOnly ? 'w-full' : 'w-3/4'} p-2`}>
+                  <Drawer
 
-                <Drawer
-
-                  // Add a custom backdrop for outside click detection
-                  disableScrollLock={false}
-                  disableRestoreFocus={true}
-                  anchor='right' open={open} onClose={toggleDrawer(false)}
-                  sx={{
-                    '.MuiBackdrop-root': {
-                      backgroundColor: 'transparent', // Remove gray background
-                    },
-                    width: 'auto', // Set width of the drawer (can be specific like '300px' or '20%')
-                    height: '100px', // Set height to one-third of the viewport height
-                    position: 'absolute', // Position it properly on the right side of the screen
-                    top: 0, // Ensure it starts from the top of the screen
-                  }}
-                >
-                    <Searchbar editor={editor} isOpen={open}/>
-                </Drawer>
-
-
-                {!isReadOnly && 
-                  <div className="flex py-2 flex-row justify-between gap-4" style={{maxWidth: '42rem', margin: '0 auto'}}>
-
-                    <div className="flex gap-4">
-                      <Button size="small"
-                        variant="contained"
-                              style={{ backgroundColor: isLoading ? 'gray' : undefined }}
-                        startIcon={<ImportExportIcon />}
-
-                        onClick={handleExport}>
-                        Export to PDF
-                      </Button>
-
-                      <Button size="small"
-                        variant="contained"
-                        startIcon={<CloudUploadIcon />}
-                        onClick={handleImportClick}
-                        loading={isImportLoading}
-                        loadingPosition="start"
-                      >
-                        Import Docx
-                        <input
-                          onChange={handleImportFilePick}
-                          type="file"
-                          accept=".docx"
-                          style={{ display: 'none' }}
-                          ref={importRef}
-                        />
-                      </Button>
-
-                      <Button onClick={handleSeach} size="small"
-                              variant="contained"
-                              startIcon={<SearchIcon />}
-                              >
-                        Search
-                      </Button>
-                    </div>
-
-                    <CustomizedMenus  room={room} handleExport={handleCoverExport} />
-                  </div>
-                }
-                {/*{isLoading && <div className="hint purple-spinner">Processing...</div>}*/}
-
-
-                <EditorContent editor={editor}  />
-                {!isReadOnly &&
-                  <>
-                  <ContentItemMenu editor={editor} />
-                  <LinkMenu editor={editor} appendTo={menuContainerRef} />
-                  <TextMenu editor={editor} createThread={createThread} currentVersion={currentVersion} />
-                  <ColumnsMenu editor={editor} appendTo={menuContainerRef} />
-                  <TableRowMenu editor={editor} appendTo={menuContainerRef} />
-                  <TableColumnMenu editor={editor} appendTo={menuContainerRef} />
-                  <ImageBlockMenu editor={editor} appendTo={menuContainerRef} />
-                  </>
-                }
-              </div>
-              {!isReadOnly && 
-              <div className="w-1/4 sidebar">
-
-              {fileInfo.publishornot !== 0 && (
-                <Accordion defaultExpanded>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" style={{border: '1px solid #f0f0f0',}}>
-                    <Typography component="span"
-
-                    >Comments</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography>
-                      <CommentHtml setShowUnresolved={setShowUnresolved} showUnresolved={showUnresolved}
-                                  provider={provider} filteredThreads={filteredThreads1} />
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-              )}
-                <Accordion defaultExpanded={fileInfo.publishornot === 0}>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel2-content"
-                    id="panel2-header"
-                    style={{
-                      border: '1px solid #f0f0f0',
-
+                    // Add a custom backdrop for outside click detection
+                    disableScrollLock={false}
+                    disableRestoreFocus={true}
+                    anchor='right' open={open} onClose={toggleDrawer(false)}
+                    sx={{
+                      '.MuiBackdrop-root': {
+                        backgroundColor: 'transparent', // Remove gray background
+                      },
+                      width: 'auto', // Set width of the drawer (can be specific like '300px' or '20%')
+                      height: '100px', // Set height to one-third of the viewport height
+                      position: 'absolute', // Position it properly on the right side of the screen
+                      top: 0, // Ensure it starts from the top of the screen
                     }}
                   >
-                    <Typography component="span"
-
-                    >Version History</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography>
-                      <VersionHtml
+                      <Searchbar editor={editor} isOpen={open}/>
+                  </Drawer>
 
 
-                        versions={versions}
-                                  isAutoVersioning={isAutoVersioning}
-                                  hasChanges={hasChanges}
-                                  commitDescription={commitDescription}
-                                  provider={provider}
-                                  versioningModalOpen={versioningModalOpen}
-                                  editor={editor}
-                                  handleVersioningClose={handleVersioningClose}
-                                  handleRevert={handleRevert}
-                                  handleCommitDescriptionChange={handleCommitDescriptionChange}
-                                  handleNewVersion={handleNewVersion}
-                                  showVersioningModal={showVersioningModal}
-                      />
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
+                  {!isReadOnly &&
+                    <div className="flex py-2 flex-row justify-between gap-4" style={{maxWidth: '42rem', margin: '0 auto'}}>
+
+                      <div className="flex gap-4">
+                        <Button size="small"
+                          variant="contained"
+                                style={{ backgroundColor: isLoading ? 'gray' : undefined }}
+                          startIcon={<ImportExportIcon />}
+
+                          onClick={handleExport}>
+                          Export to PDF
+                        </Button>
+
+                        <Button size="small"
+                          variant="contained"
+                          startIcon={<CloudUploadIcon />}
+                          onClick={handleImportClick}
+                          loading={isImportLoading}
+                          loadingPosition="start"
+                        >
+                          Import Docx
+                          <input
+                            onChange={handleImportFilePick}
+                            type="file"
+                            accept=".docx"
+                            style={{ display: 'none' }}
+                            ref={importRef}
+                          />
+                        </Button>
+
+                        <Button onClick={handleSeach} size="small"
+                                variant="contained"
+                                startIcon={<SearchIcon />}
+                                >
+                          Search
+                        </Button>
+                      </div>
+
+                      <CustomizedMenus  room={room} handleExport={handleCoverExport} />
+                    </div>
+                  }
+                  {/*{isLoading && <div className="hint purple-spinner">Processing...</div>}*/}
+
+
+                <EditorContent editor={editor} />
+                <TextMenu editor={editor} showComment={true && fileInfo.publishornot==0} />
+                {!isReadOnly &&
+                    <>
+                    <ContentItemMenu editor={editor} />
+                    <LinkMenu editor={editor} appendTo={menuContainerRef} />
+                    <ColumnsMenu editor={editor} appendTo={menuContainerRef} />
+                    <TableRowMenu editor={editor} appendTo={menuContainerRef} />
+                    <TableColumnMenu editor={editor} appendTo={menuContainerRef} />
+                    <ImageBlockMenu editor={editor} appendTo={menuContainerRef} />
+                    </>
+                  }
+                </div>
+
+                { (fileInfo.publishornot == 0 || !isReadOnly) && (
+                  <div className="w-1/4 sidebar overflow-y-auto">
+                    {fileInfo.publishornot == 0 && (
+                      <Accordion defaultExpanded>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" style={{border: '1px solid #f0f0f0',}}>
+                          <Typography component="span"
+                          >Comments</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Typography>
+                            <CommentHtml setShowUnresolved={setShowUnresolved} showUnresolved={showUnresolved}
+                                         provider={provider} filteredThreads={filteredThreads1} />
+                          </Typography>
+                        </AccordionDetails>
+                      </Accordion>
+                    ) }
+
+                    {!isReadOnly && (   <Accordion defaultExpanded={fileInfo.publishornot == 1}>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel2-content"
+                          id="panel2-header"
+                          style={{
+                            border: '1px solid #f0f0f0',
+
+                          }}
+                        >
+                          <Typography component="span"
+
+                          >Version History</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Typography>
+                            <VersionHtml
+
+
+                              versions={versions}
+                              isAutoVersioning={isAutoVersioning}
+                              hasChanges={hasChanges}
+                              commitDescription={commitDescription}
+                              provider={provider}
+                              versioningModalOpen={versioningModalOpen}
+                              editor={editor}
+                              handleVersioningClose={handleVersioningClose}
+                              handleRevert={handleRevert}
+                              handleCommitDescriptionChange={handleCommitDescriptionChange}
+                              handleNewVersion={handleNewVersion}
+                              showVersioningModal={showVersioningModal}
+                            />
+                          </Typography>
+                        </AccordionDetails>
+                      </Accordion>
+                    )}
+                  </div>
+                )}
 
 
               </div>
-            }
-            </div>
-        </div>
+          </div>
+
       </div>
       </ThreadsProvider>
     </>
